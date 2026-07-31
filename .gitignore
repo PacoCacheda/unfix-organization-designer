@@ -1,0 +1,26 @@
+# Sistema operativo
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# iCloud
+.icloud
+
+# Obsidian
+.obsidian/
+.trash/
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*~
+
+# Exportaciones locales de la herramienta
+*.local.json
+exports/

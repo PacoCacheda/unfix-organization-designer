@@ -1,0 +1,2725 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>unFIX Organization Designer</title>
+<meta name="description" content="Diseñador visual de organizaciones basado en el modelo unFIX de Jurgen Appelo. Bases, Crews, Forums, Turfs, Leagues y Crowds.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   unFIX Organization Designer — Design tokens
+   Paleta derivada de los gradientes oficiales de unfix.com
+   Base FABA64→C27106 · Crew E2D5ED→B364FA · Forum 64FAFA→06C6C6
+   Turf EDECD5→FAF364 · Accent 6806C2
+   ============================================================ */
+:root{
+  /* Superficie */
+  --bg-void:#07070d;
+  --bg-deep:#0d0d17;
+  --bg-mid:#141425;
+  --grid-line:rgba(148,140,255,.055);
+  --glass:rgba(20,20,36,.62);
+  --glass-hi:rgba(38,36,64,.72);
+  --glass-brd:rgba(255,255,255,.09);
+  --glass-brd-hi:rgba(255,255,255,.16);
+
+  /* Texto */
+  --tx-1:#f2f0ff;
+  --tx-2:#a9a4c9;
+  --tx-3:#6f6a90;
+
+  /* Familias de patrón unFIX */
+  --base-bg:#F59E4B;
+  --base-bg-deep:#C27106;
+  --crew-bg:#B364FA;
+  --forum-bg:#06C6C6;
+  --forum-bg-lite:#64FAFA;
+  --turf-bg:#E3D354;
+  --accent:#8B5CF6;
+  --accent-2:#06C6C6;
+
+  /* Crew types */
+  --crew-value-stream:#7C5CFF;
+  --crew-experience:#FF6B9D;
+  --crew-facilitation:#FFC145;
+  --crew-capability:#FF7A45;
+  --crew-platform:#2DD4A7;
+  --crew-governance:#C084FC;
+  --crew-partnership:#38BDF8;
+
+  /* Escalado */
+  --league-bg:#8B5CF6;
+  --cluster-bg:#A78BFA;
+  --assembly-bg:#22D3EE;
+  --crowd-bg:#F472B6;
+  --coalition-bg:#FB7185;
+  --congress-bg:#5EEAD4;
+
+  /* Estados de madurez */
+  --state-turmoil:#FF5A5F;
+  --state-forming:#FFB020;
+  --state-performing:#34D399;
+  --state-reforming:#A78BFA;
+
+  /* Conexiones */
+  --link-flow:#06C6C6;
+  --link-dependency:#FFB020;
+  --link-alignment:#C084FC;
+
+  --r-sm:8px; --r-md:12px; --r-lg:18px; --r-xl:24px;
+  --shadow-1:0 1px 2px rgba(0,0,0,.4);
+  --shadow-2:0 8px 24px -6px rgba(0,0,0,.55);
+  --shadow-3:0 24px 64px -16px rgba(0,0,0,.7);
+  --ease:cubic-bezier(.22,.9,.31,1);
+  --sidebar-w:294px;
+  --inspector-w:330px;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:var(--bg-void);
+  color:var(--tx-1);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:99px;border:2px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2);background-clip:content-box}
+
+/* ── App shell ─────────────────────────────────────────────── */
+#app{
+  position:fixed;inset:0;
+  display:grid;
+  grid-template-rows:auto 1fr;
+  background:
+    radial-gradient(1100px 700px at 12% -8%, rgba(139,92,246,.20), transparent 62%),
+    radial-gradient(950px 650px at 92% 110%, rgba(6,198,198,.15), transparent 60%),
+    radial-gradient(700px 500px at 60% 40%, rgba(245,158,75,.055), transparent 70%),
+    linear-gradient(175deg,var(--bg-deep) 0%,var(--bg-void) 100%);
+}
+
+/* ── Topbar ────────────────────────────────────────────────── */
+#topbar{
+  display:flex;align-items:center;gap:14px;
+  padding:0 16px;height:60px;
+  background:linear-gradient(180deg,rgba(20,20,37,.86),rgba(13,13,23,.62));
+  backdrop-filter:blur(20px) saturate(160%);
+  -webkit-backdrop-filter:blur(20px) saturate(160%);
+  border-bottom:1px solid var(--glass-brd);
+  z-index:60;position:relative;
+}
+.brand{display:flex;align-items:center;gap:11px;padding-right:14px;border-right:1px solid var(--glass-brd);min-width:0}
+.brand-mark{
+  width:34px;height:34px;border-radius:10px;flex:none;
+  background:conic-gradient(from 210deg,var(--base-bg),var(--crew-bg),var(--forum-bg),var(--turf-bg),var(--base-bg));
+  display:grid;place-items:center;box-shadow:0 0 0 1px rgba(255,255,255,.14),0 6px 18px -6px rgba(139,92,246,.85);
+}
+.brand-mark svg{width:19px;height:19px}
+.brand-txt{line-height:1.05;min-width:0}
+.brand-txt b{display:block;font-size:15px;font-weight:700;letter-spacing:-.02em;white-space:nowrap}
+.brand-txt b em{font-style:normal;color:var(--tx-3);font-weight:500}
+.brand-txt span{display:block;font-size:10px;color:var(--tx-3);letter-spacing:.13em;text-transform:uppercase;margin-top:2px;white-space:nowrap}
+
+.doc-name{
+  background:transparent;border:1px solid transparent;border-radius:var(--r-sm);
+  padding:6px 10px;font-size:13.5px;font-weight:600;min-width:130px;max-width:260px;
+  transition:.18s var(--ease);
+}
+.doc-name:hover{background:rgba(255,255,255,.05);border-color:var(--glass-brd)}
+.doc-name:focus{outline:none;background:rgba(255,255,255,.07);border-color:var(--accent)}
+
+.spacer{flex:1}
+.tool-group{display:flex;align-items:center;gap:3px;padding:3px;background:rgba(255,255,255,.035);border:1px solid var(--glass-brd);border-radius:11px}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  height:32px;padding:0 11px;border-radius:8px;
+  background:transparent;border:1px solid transparent;color:var(--tx-2);
+  font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap;
+  transition:background .16s var(--ease),color .16s var(--ease),border-color .16s var(--ease),transform .1s var(--ease);
+}
+.btn:hover{background:rgba(255,255,255,.075);color:var(--tx-1)}
+.btn:active{transform:scale(.965)}
+.btn svg{width:15px;height:15px;flex:none}
+.btn.icon{width:32px;padding:0}
+.btn.on{background:rgba(139,92,246,.24);color:#e9ddff;border-color:rgba(167,139,250,.5);box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+.btn.primary{background:linear-gradient(140deg,var(--accent),#6d28d9);color:#fff;border-color:rgba(255,255,255,.16);box-shadow:0 6px 18px -8px rgba(139,92,246,.9)}
+.btn.primary:hover{filter:brightness(1.12)}
+.btn:disabled{opacity:.32;pointer-events:none}
+
+.lang-switch{display:flex;background:rgba(255,255,255,.035);border:1px solid var(--glass-brd);border-radius:9px;padding:2px}
+.lang-switch button{
+  border:0;background:transparent;color:var(--tx-3);font-size:11px;font-weight:700;letter-spacing:.06em;
+  padding:5px 10px;border-radius:7px;cursor:pointer;transition:.18s var(--ease)
+}
+.lang-switch button.on{background:rgba(255,255,255,.11);color:var(--tx-1);box-shadow:var(--shadow-1)}
+
+/* ── Body layout ───────────────────────────────────────────── */
+#body{position:relative;display:grid;grid-template-columns:var(--sidebar-w) 1fr var(--inspector-w);min-height:0}
+#body.no-inspector{grid-template-columns:var(--sidebar-w) 1fr 0}
+
+/* ── Glass panels ──────────────────────────────────────────── */
+.panel{
+  position:relative;z-index:30;min-height:0;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,rgba(24,23,44,.7),rgba(13,13,23,.58));
+  backdrop-filter:blur(26px) saturate(165%);
+  -webkit-backdrop-filter:blur(26px) saturate(165%);
+}
+#sidebar{border-right:1px solid var(--glass-brd)}
+#inspector{border-left:1px solid var(--glass-brd);transition:transform .32s var(--ease),opacity .24s var(--ease)}
+#body.no-inspector #inspector{transform:translateX(100%);opacity:0;pointer-events:none}
+
+.panel-head{
+  display:flex;align-items:center;gap:9px;padding:14px 16px 10px;flex:none;
+}
+.panel-head h2{margin:0;font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--tx-3)}
+.panel-scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:0 12px 22px;scrollbar-gutter:stable}
+
+.search-wrap{position:relative;margin:0 12px 12px;flex:none}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--tx-3);pointer-events:none}
+.search-wrap input{
+  width:100%;height:34px;padding:0 10px 0 31px;border-radius:9px;
+  background:rgba(255,255,255,.045);border:1px solid var(--glass-brd);color:var(--tx-1);font-size:12.5px;
+  transition:.18s var(--ease)
+}
+.search-wrap input::placeholder{color:var(--tx-3)}
+.search-wrap input:focus{outline:none;border-color:rgba(139,92,246,.55);background:rgba(139,92,246,.09)}
+
+/* ── Palette ───────────────────────────────────────────────── */
+.pgroup{margin-bottom:6px}
+.pgroup-head{
+  width:100%;display:flex;align-items:center;gap:8px;
+  padding:9px 8px;border:0;background:transparent;cursor:pointer;border-radius:9px;
+  color:var(--tx-2);font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  transition:.16s var(--ease)
+}
+.pgroup-head:hover{background:rgba(255,255,255,.05);color:var(--tx-1)}
+.pgroup-head .dot{width:8px;height:8px;border-radius:3px;flex:none;box-shadow:0 0 10px currentColor}
+.pgroup-head .chev{margin-left:auto;width:13px;height:13px;transition:transform .26s var(--ease);color:var(--tx-3)}
+.pgroup.collapsed .chev{transform:rotate(-90deg)}
+.pgroup-body{display:grid;gap:5px;padding:2px 0 8px;overflow:hidden}
+.pgroup.collapsed .pgroup-body{display:none}
+.pgroup-note{font-size:10.5px;color:var(--tx-3);line-height:1.5;padding:0 8px 7px;margin:-2px 0 0}
+
+.pitem{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:9px 10px;border-radius:11px;cursor:grab;
+  background:rgba(255,255,255,.032);border:1px solid var(--glass-brd);
+  transition:transform .16s var(--ease),background .16s var(--ease),border-color .16s var(--ease),box-shadow .16s var(--ease);
+}
+.pitem:hover{background:rgba(255,255,255,.075);border-color:var(--glass-brd-hi);transform:translateX(3px);box-shadow:var(--shadow-2)}
+.pitem:active{cursor:grabbing;transform:scale(.98)}
+.pitem-ic{width:29px;height:29px;border-radius:9px;flex:none;display:grid;place-items:center;position:relative;overflow:hidden}
+.pitem-ic::after{content:'';position:absolute;inset:0;background:currentColor;opacity:.16}
+.pitem-ic svg{width:16px;height:16px;position:relative;z-index:1}
+.pitem-tx{min-width:0;flex:1}
+.pitem-tx b{display:block;font-size:12.5px;font-weight:600;color:var(--tx-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
+.pitem-tx span{display:block;font-size:10.5px;color:var(--tx-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.pitem-add{width:19px;height:19px;flex:none;opacity:0;color:var(--tx-3);transition:opacity .16s var(--ease)}
+.pitem:hover .pitem-add{opacity:1}
+
+/* ── Canvas ────────────────────────────────────────────────── */
+#stage{position:relative;overflow:hidden;min-width:0}
+#grid{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(var(--grid-line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);
+  background-size:32px 32px;
+  mask-image:radial-gradient(ellipse 88% 78% at 50% 45%,#000 32%,transparent 100%);
+  -webkit-mask-image:radial-gradient(ellipse 88% 78% at 50% 45%,#000 32%,transparent 100%);
+}
+#canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#canvas.panning{cursor:grabbing}
+#canvas.linking{cursor:crosshair}
+#stage.drop-armed::after{
+  content:'';position:absolute;inset:12px;border:2px dashed rgba(139,92,246,.5);
+  border-radius:var(--r-xl);pointer-events:none;background:rgba(139,92,246,.05);
+}
+
+.node-g{cursor:grab}
+.node-g.dragging{cursor:grabbing}
+.node-title{font-size:13.5px;font-weight:600;letter-spacing:-.015em;fill:#fff;pointer-events:none}
+.node-kind{font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;pointer-events:none}
+.node-mission{font-size:10.5px;font-weight:400;fill:rgba(255,255,255,.6);pointer-events:none}
+.node-meta{font-size:9.5px;font-weight:600;letter-spacing:.04em;pointer-events:none}
+.cont-title{font-size:16px;font-weight:700;letter-spacing:-.02em;fill:#fff;pointer-events:none}
+.cont-kind{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;pointer-events:none}
+.cont-sub{font-size:10.5px;font-weight:500;pointer-events:none}
+.link-lbl{font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;pointer-events:none}
+
+@keyframes popIn{
+  from{opacity:0;transform:scale(.86) translateY(10px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
+}
+.node-g.enter,.cont-g.enter{animation:popIn .42s var(--ease) both;transform-box:fill-box;transform-origin:center}
+@keyframes turmoilShake{
+  0%,100%{transform:translate(0,0)}
+  20%{transform:translate(-1.1px,.7px)}
+  40%{transform:translate(1.1px,-.6px)}
+  60%{transform:translate(-.8px,-.8px)}
+  80%{transform:translate(.7px,1px)}
+}
+.st-turmoil .shell{animation:turmoilShake 1.5s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes dashRun{to{stroke-dashoffset:-42}}
+.link-flow-anim{animation:dashRun 1.5s linear infinite}
+@keyframes ringSpin{to{transform:rotate(360deg)}}
+.reform-spin{animation:ringSpin 5.5s linear infinite;transform-box:fill-box;transform-origin:center}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+}
+
+/* ── Canvas floating UI ────────────────────────────────────── */
+.float{
+  position:absolute;z-index:24;
+  background:var(--glass);backdrop-filter:blur(22px) saturate(170%);-webkit-backdrop-filter:blur(22px) saturate(170%);
+  border:1px solid var(--glass-brd);border-radius:14px;box-shadow:var(--shadow-3);
+}
+#linkbar{left:50%;transform:translateX(-50%);bottom:20px;display:flex;align-items:center;gap:4px;padding:5px}
+#linkbar .sep{width:1px;height:22px;background:var(--glass-brd);margin:0 3px}
+#zoombar{right:18px;bottom:20px;display:flex;align-items:center;gap:2px;padding:5px}
+#zoomval{font-size:11px;font-variant-numeric:tabular-nums;color:var(--tx-2);min-width:44px;text-align:center;font-weight:600;font-family:'JetBrains Mono',monospace}
+#hintbar{left:18px;bottom:20px;padding:9px 13px;font-size:11px;color:var(--tx-3);line-height:1.65;max-width:250px}
+#hintbar kbd{
+  display:inline-block;padding:1px 5px;border-radius:5px;background:rgba(255,255,255,.09);
+  border:1px solid var(--glass-brd);font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--tx-2);
+}
+#legend{left:18px;top:18px;padding:5px}
+#legend h4{margin:0 0 8px;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx-3);font-weight:700}
+.legend-head{
+  display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;cursor:pointer;
+  color:var(--tx-2);font-size:11px;font-weight:600;letter-spacing:.04em;padding:6px 9px;border-radius:9px;
+  transition:.16s var(--ease);
+}
+.legend-head:hover{background:rgba(255,255,255,.07);color:var(--tx-1)}
+.legend-head>svg{width:14px;height:14px;flex:none}
+.legend-head .chev{margin-left:auto;transition:transform .26s var(--ease);color:var(--tx-3)}
+#legend.collapsed .chev{transform:rotate(-90deg)}
+.legend-body{padding:6px 9px 7px;min-width:150px;animation:popIn .28s var(--ease)}
+#legend.collapsed .legend-body{display:none}
+#legend .row{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--tx-2);padding:2.5px 0}
+#legend .swatch{width:22px;height:3px;border-radius:2px;flex:none}
+#legend .pill{width:9px;height:9px;border-radius:99px;flex:none}
+
+/* ── Inspector ─────────────────────────────────────────────── */
+.insp-hero{padding:16px 16px 14px;border-bottom:1px solid var(--glass-brd);flex:none}
+.insp-hero-top{display:flex;align-items:flex-start;gap:11px}
+.insp-ic{width:42px;height:42px;border-radius:13px;flex:none;display:grid;place-items:center;position:relative;overflow:hidden}
+.insp-ic::after{content:'';position:absolute;inset:0;background:currentColor;opacity:.19}
+.insp-ic svg{width:22px;height:22px;position:relative;z-index:1}
+.insp-hero h3{margin:0;font-size:15.5px;font-weight:700;letter-spacing:-.02em;line-height:1.25;word-break:break-word}
+.insp-hero .fam{font-size:10px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;margin-top:3px}
+.insp-desc{margin:12px 0 0;font-size:11.5px;line-height:1.62;color:var(--tx-2)}
+.insp-desc a{color:var(--accent-2);text-decoration:none;border-bottom:1px solid rgba(6,198,198,.3)}
+.insp-desc a:hover{border-bottom-color:var(--accent-2)}
+
+.field{margin-bottom:13px}
+.field label{display:block;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tx-3);margin-bottom:6px}
+.field input[type=text],.field textarea,.field select{
+  width:100%;background:rgba(255,255,255,.045);border:1px solid var(--glass-brd);
+  border-radius:10px;padding:9px 11px;font-size:12.5px;color:var(--tx-1);transition:.18s var(--ease);
+}
+.field textarea{resize:vertical;min-height:66px;line-height:1.55}
+.field select{appearance:none;cursor:pointer;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236f6a90' stroke-width='3' stroke-linecap='round'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 11px center;padding-right:30px}
+.field select option{background:#171730;color:#f2f0ff}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:rgba(139,92,246,.6);background:rgba(139,92,246,.09)}
+.field .hint{font-size:10.5px;color:var(--tx-3);margin-top:5px;line-height:1.5}
+
+.seg{display:grid;gap:4px;background:rgba(255,255,255,.035);border:1px solid var(--glass-brd);border-radius:11px;padding:4px}
+.seg.c2{grid-template-columns:1fr 1fr}
+.seg.c4{grid-template-columns:repeat(4,1fr)}
+.seg button{
+  border:0;background:transparent;color:var(--tx-3);font-size:11px;font-weight:600;
+  padding:8px 4px;border-radius:8px;cursor:pointer;transition:.18s var(--ease);
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+}
+.seg button:hover{background:rgba(255,255,255,.06);color:var(--tx-2)}
+.seg button .bead{width:8px;height:8px;border-radius:99px;background:currentColor;opacity:.5;transition:.18s var(--ease)}
+.seg button.on{background:rgba(255,255,255,.1);color:var(--tx-1);box-shadow:var(--shadow-1)}
+.seg button.on .bead{opacity:1;box-shadow:0 0 10px currentColor;transform:scale(1.25)}
+
+.stepper{display:flex;align-items:center;gap:8px}
+.stepper button{
+  width:30px;height:30px;border-radius:9px;border:1px solid var(--glass-brd);background:rgba(255,255,255,.045);
+  color:var(--tx-2);cursor:pointer;font-size:16px;line-height:1;display:grid;place-items:center;transition:.16s var(--ease)
+}
+.stepper button:hover{background:rgba(255,255,255,.1);color:var(--tx-1)}
+.stepper .val{
+  flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;
+  background:rgba(255,255,255,.04);border:1px solid var(--glass-brd);border-radius:9px;padding:6px
+}
+.stepper .val.warn{color:var(--state-turmoil);border-color:rgba(255,90,95,.42);background:rgba(255,90,95,.1)}
+
+.divider{height:1px;background:var(--glass-brd);margin:16px 0}
+.sec-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--tx-3);margin:0 0 9px}
+
+.link-row{
+  display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;
+  background:rgba(255,255,255,.032);border:1px solid var(--glass-brd);margin-bottom:5px;font-size:11.5px;
+}
+.link-row .bar{width:3px;height:20px;border-radius:2px;flex:none}
+.link-row .tx{flex:1;min-width:0}
+.link-row .tx b{display:block;font-weight:600;color:var(--tx-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.link-row .tx span{display:block;font-size:10px;color:var(--tx-3)}
+.link-row button{border:0;background:transparent;color:var(--tx-3);cursor:pointer;padding:3px;border-radius:6px;display:grid;place-items:center}
+.link-row button:hover{background:rgba(255,90,95,.16);color:var(--state-turmoil)}
+.link-row button svg{width:14px;height:14px}
+
+.empty{padding:40px 22px;text-align:center;color:var(--tx-3)}
+.empty svg{width:38px;height:38px;opacity:.3;margin-bottom:12px}
+.empty p{margin:0;font-size:12px;line-height:1.65}
+.empty b{display:block;color:var(--tx-2);font-size:13px;margin-bottom:5px;font-weight:600}
+
+.insp-foot{padding:12px 16px;border-top:1px solid var(--glass-brd);display:flex;gap:7px;flex:none}
+.insp-foot .btn{flex:1;border:1px solid var(--glass-brd);background:rgba(255,255,255,.04)}
+.insp-foot .btn.danger:hover{background:rgba(255,90,95,.16);color:#ffb3b5;border-color:rgba(255,90,95,.4)}
+
+/* ── Diagnóstico ───────────────────────────────────────────── */
+.diag{padding:10px 12px;border-radius:11px;border:1px solid;margin-bottom:6px;font-size:11.5px;line-height:1.55;display:flex;gap:9px}
+.diag svg{width:15px;height:15px;flex:none;margin-top:1px}
+.diag b{display:block;font-weight:600;margin-bottom:2px}
+.diag.ok{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.26);color:#a7f3d0}
+.diag.warn{background:rgba(255,176,32,.08);border-color:rgba(255,176,32,.26);color:#fde08a}
+.diag.err{background:rgba(255,90,95,.08);border-color:rgba(255,90,95,.26);color:#fecdd3}
+
+/* ── Modal ─────────────────────────────────────────────────── */
+#modal-bg{
+  position:fixed;inset:0;z-index:200;display:none;place-items:center;padding:24px;
+  background:rgba(5,5,12,.72);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);
+}
+#modal-bg.open{display:grid;animation:popIn .26s var(--ease)}
+.modal{
+  width:min(560px,100%);max-height:82vh;display:flex;flex-direction:column;
+  background:linear-gradient(165deg,rgba(32,30,58,.96),rgba(15,15,28,.97));
+  border:1px solid var(--glass-brd-hi);border-radius:var(--r-xl);box-shadow:var(--shadow-3);overflow:hidden;
+}
+.modal-head{display:flex;align-items:center;gap:10px;padding:18px 20px 14px;border-bottom:1px solid var(--glass-brd)}
+.modal-head h3{margin:0;font-size:16px;font-weight:700;letter-spacing:-.02em;flex:1}
+.modal-body{padding:18px 20px;overflow-y:auto;font-size:12.5px;line-height:1.7;color:var(--tx-2)}
+.modal-body h4{margin:18px 0 7px;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--tx-3);font-weight:700}
+.modal-body h4:first-child{margin-top:0}
+.modal-body ul{margin:0;padding-left:17px}
+.modal-body li{margin-bottom:5px}
+.modal-body code{
+  font-family:'JetBrains Mono',monospace;font-size:11px;background:rgba(255,255,255,.07);
+  padding:1.5px 5px;border-radius:5px;color:var(--forum-bg-lite)
+}
+.modal-body a{color:var(--accent-2);text-decoration:none;border-bottom:1px solid rgba(6,198,198,.3)}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--glass-brd);display:flex;gap:8px;justify-content:flex-end}
+
+#toast-wrap{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{
+  padding:10px 16px;border-radius:11px;font-size:12.5px;font-weight:500;
+  background:rgba(28,27,52,.94);border:1px solid var(--glass-brd-hi);box-shadow:var(--shadow-3);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  animation:popIn .3s var(--ease);display:flex;align-items:center;gap:9px;
+}
+.toast svg{width:15px;height:15px;flex:none}
+.toast.ok svg{color:var(--state-performing)}
+.toast.err svg{color:var(--state-turmoil)}
+
+/* ── Tour guiado con foco ──────────────────────────────────── */
+#tour{position:fixed;inset:0;z-index:250;display:none}
+#tour.on{display:block}
+#tour-catch{position:absolute;inset:0;cursor:default}
+#tour-hole{
+  position:absolute;left:50%;top:50%;width:0;height:0;border-radius:20px;
+  box-shadow:0 0 0 9999px rgba(5,5,13,.72);
+  border:2px solid rgba(167,139,250,.9);
+  pointer-events:none;
+  transition:left .42s var(--ease),top .42s var(--ease),width .42s var(--ease),height .42s var(--ease),border-radius .3s var(--ease),opacity .25s;
+}
+#tour-hole::after{
+  content:'';position:absolute;inset:-7px;border-radius:inherit;
+  border:2px solid rgba(167,139,250,.35);
+  animation:tourPulse 2.1s var(--ease) infinite;
+}
+#tour.no-target #tour-hole{border-color:transparent}
+#tour.no-target #tour-hole::after{display:none}
+@keyframes tourPulse{
+  0%{transform:scale(1);opacity:.85}
+  70%{transform:scale(1.05);opacity:0}
+  100%{transform:scale(1.05);opacity:0}
+}
+#tour-card{
+  position:absolute;width:min(372px,calc(100vw - 28px));
+  background:linear-gradient(168deg,rgba(35,33,64,.975),rgba(15,15,29,.985));
+  border:1px solid var(--glass-brd-hi);border-radius:18px;
+  box-shadow:0 30px 74px -14px rgba(0,0,0,.86),0 0 0 1px rgba(139,92,246,.14);
+  padding:17px 18px 14px;
+  animation:popIn .34s var(--ease);
+  transition:left .34s var(--ease),top .34s var(--ease);
+}
+#tour-arrow{
+  position:absolute;width:13px;height:13px;transform:rotate(45deg);
+  background:linear-gradient(135deg,rgba(35,33,64,.99),rgba(24,22,48,.99));
+  border:1px solid var(--glass-brd-hi);
+}
+#tour-arrow.up{border-right:0;border-bottom:0}
+#tour-arrow.down{border-left:0;border-top:0}
+#tour-arrow.left{border-top:0;border-right:0}
+#tour-arrow.right{border-bottom:0;border-left:0}
+#tour-arrow.none{display:none}
+.tour-top{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+.tour-ic{width:32px;height:32px;border-radius:10px;flex:none;display:grid;place-items:center;position:relative;overflow:hidden}
+.tour-ic::after{content:'';position:absolute;inset:0;background:currentColor;opacity:.19}
+.tour-ic svg{width:17px;height:17px;position:relative;z-index:1}
+.tour-step{
+  margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;
+  color:var(--tx-3);letter-spacing:.06em;background:rgba(255,255,255,.05);
+  border:1px solid var(--glass-brd);padding:3px 8px;border-radius:99px;flex:none;
+}
+#tour-card h4{margin:0;font-size:15.5px;font-weight:700;letter-spacing:-.02em;line-height:1.3;flex:1;min-width:0}
+#tour-card p{margin:0 0 11px;font-size:12.5px;line-height:1.66;color:var(--tx-2)}
+#tour-card p:last-of-type{margin-bottom:13px}
+#tour-card b{color:var(--tx-1);font-weight:600}
+#tour-card code{
+  font-family:'JetBrains Mono',monospace;font-size:11px;background:rgba(255,255,255,.08);
+  padding:1.5px 5px;border-radius:5px;color:var(--forum-bg-lite)
+}
+.tour-quote{
+  margin:0 0 13px !important;padding:9px 11px;border-radius:10px;font-size:11.5px !important;line-height:1.6 !important;
+  background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.26);color:#d7c9ff !important;
+  display:flex;gap:8px;
+}
+.tour-quote svg{width:14px;height:14px;flex:none;margin-top:2px;opacity:.85}
+.tour-bar{display:flex;gap:3px;margin-bottom:12px}
+.tour-bar i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.11);transition:background .3s var(--ease)}
+.tour-bar i.on{background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+.tour-foot{display:flex;align-items:center;gap:7px}
+.tour-foot .btn{height:31px}
+.tour-foot .skip{margin-right:auto;color:var(--tx-3);padding:0 4px}
+.tour-foot .skip:hover{color:var(--tx-2);background:transparent;text-decoration:underline}
+
+/* ── Responsive ────────────────────────────────────────────── */
+#mobile-tabs{display:none}
+@media (max-width:1180px){
+  :root{--sidebar-w:250px;--inspector-w:290px}
+  #hintbar{display:none}
+}
+@media (max-width:900px){
+  #body{grid-template-columns:1fr}
+  #body.no-inspector{grid-template-columns:1fr}
+  #sidebar,#inspector{
+    position:absolute;top:0;bottom:46px;width:min(320px,86vw);z-index:50;
+    transition:transform .3s var(--ease);
+  }
+  #sidebar{left:0;transform:translateX(-101%);border-right:1px solid var(--glass-brd-hi)}
+  #inspector{right:0;transform:translateX(101%);border-left:1px solid var(--glass-brd-hi);opacity:1;pointer-events:auto}
+  #body.no-inspector #inspector{transform:translateX(101%);opacity:1}
+  #body.m-left #sidebar{transform:translateX(0);box-shadow:var(--shadow-3)}
+  #body.m-right #inspector{transform:translateX(0);box-shadow:var(--shadow-3)}
+  #stage{grid-column:1;grid-row:1}
+  #mobile-tabs{
+    display:flex;position:absolute;left:0;right:0;bottom:0;height:46px;z-index:70;
+    background:rgba(15,15,28,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    border-top:1px solid var(--glass-brd);
+  }
+  #mobile-tabs button{
+    flex:1;border:0;background:transparent;color:var(--tx-3);font-size:10.5px;font-weight:600;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;
+  }
+  #mobile-tabs button svg{width:17px;height:17px}
+  #mobile-tabs button.on{color:var(--accent)}
+  #tour-card{
+    left:14px !important;right:14px;bottom:58px;top:auto !important;
+    width:auto;max-width:none;
+  }
+  #tour-arrow{display:none}
+  #zoombar{bottom:60px}
+  #linkbar{bottom:108px}
+  #legend{display:none}
+  .brand-txt{display:none}
+  #topbar{gap:8px;padding:0 10px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+  #topbar::-webkit-scrollbar{display:none}
+  #topbar>*{flex:none}
+  .spacer{display:none}
+  .doc-name{min-width:112px;max-width:160px}
+  #toast-wrap{bottom:158px}
+  .hide-sm{display:none !important}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ═══ TOPBAR ═══ -->
+  <header id="topbar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="3.5"/>
+          <rect x="3" y="14" width="7" height="7" rx="3.5"/><rect x="14" y="14" width="7" height="7" rx="1.6"/>
+        </svg>
+      </div>
+      <div class="brand-txt">
+        <b>unFIX <em>Designer</em></b>
+        <span data-i18n="brand.sub">Organization Design</span>
+      </div>
+    </div>
+
+    <input id="doc-name" class="doc-name" type="text" value="Mi Organización" spellcheck="false" aria-label="Nombre del diseño">
+
+    <div class="spacer"></div>
+
+    <div class="tool-group hide-sm">
+      <button class="btn icon" id="btn-undo" data-tip="undo" aria-label="Deshacer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 8"/></svg>
+      </button>
+      <button class="btn icon" id="btn-redo" data-tip="redo" aria-label="Rehacer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>
+      </button>
+    </div>
+
+    <div class="tool-group">
+      <button class="btn" id="btn-diag">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        <span class="hide-sm" data-i18n="tb.diag">Diagnóstico</span>
+        <span id="diag-badge" style="display:none;font-family:'JetBrains Mono',monospace;font-size:10px;background:rgba(255,176,32,.2);color:#FFB020;padding:1px 6px;border-radius:99px;font-weight:700"></span>
+      </button>
+      <button class="btn" id="btn-example">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8-4.9-3.6-4.9 3.6 1.9-5.8L4 8.8h6.1z"/></svg>
+        <span class="hide-sm" data-i18n="tb.example">Ejemplo</span>
+      </button>
+      <button class="btn" id="btn-clear">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+        <span class="hide-sm" data-i18n="tb.clear">Vaciar</span>
+      </button>
+    </div>
+
+    <div class="tool-group">
+      <button class="btn" id="btn-import">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        <span class="hide-sm" data-i18n="tb.import">Importar</span>
+      </button>
+      <button class="btn primary" id="btn-export">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        <span data-i18n="tb.export">Exportar</span>
+      </button>
+    </div>
+
+    <div class="lang-switch" role="group" aria-label="Idioma">
+      <button data-lang="es" class="on">ES</button>
+      <button data-lang="en">EN</button>
+    </div>
+
+    <div class="tool-group">
+      <button class="btn" id="btn-tour">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M15.6 8.4l-2 5.2-5.2 2 2-5.2z"/></svg>
+        <span class="hide-sm" data-i18n="tb.tour">Guía</span>
+      </button>
+      <button class="btn icon" id="btn-help" aria-label="Ayuda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ BODY ═══ -->
+  <div id="body">
+
+    <!-- ── Palette ── -->
+    <aside id="sidebar" class="panel">
+      <div class="panel-head">
+        <h2 data-i18n="side.title">Biblioteca de patrones</h2>
+      </div>
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="palette-search" type="text" data-i18n-ph="side.search" placeholder="Buscar patrón…" spellcheck="false">
+      </div>
+      <div class="panel-scroll" id="palette"></div>
+    </aside>
+
+    <!-- ── Canvas ── -->
+    <main id="stage">
+      <div id="grid"></div>
+      <svg id="canvas" xmlns="http://www.w3.org/2000/svg"></svg>
+
+      <div class="float collapsed" id="legend">
+        <button class="legend-head" id="legend-toggle" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v5M12 7.6h.01"/></svg>
+          <span data-i18n="legend.title">Leyenda</span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="legend-body">
+        <h4 data-i18n="legend.links">Conexiones</h4>
+        <div class="row"><span class="swatch" style="background:var(--link-flow)"></span><span data-i18n="link.flow">Flujo de valor</span></div>
+        <div class="row"><span class="swatch" style="background:repeating-linear-gradient(90deg,var(--link-dependency) 0 5px,transparent 5px 9px)"></span><span data-i18n="link.dependency">Dependencia</span></div>
+        <div class="row"><span class="swatch" style="background:repeating-linear-gradient(90deg,var(--link-alignment) 0 2px,transparent 2px 5px)"></span><span data-i18n="link.alignment">Alineación</span></div>
+        <h4 style="margin-top:11px" data-i18n="legend.states">Madurez</h4>
+        <div class="row"><span class="pill" style="background:var(--state-turmoil)"></span>Turmoil</div>
+        <div class="row"><span class="pill" style="background:var(--state-forming)"></span>Forming</div>
+        <div class="row"><span class="pill" style="background:var(--state-performing)"></span>Performing</div>
+        <div class="row"><span class="pill" style="background:var(--state-reforming)"></span>Reforming</div>
+        </div>
+      </div>
+
+      <div class="float" id="linkbar">
+        <button class="btn" id="tool-select">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3l7.5 17.5 2.3-7.2 7.2-2.3z"/></svg>
+          <span class="hide-sm" data-i18n="tool.select">Seleccionar</span>
+        </button>
+        <span class="sep"></span>
+        <button class="btn" data-link="flow" style="--c:var(--link-flow)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h14"/><path d="M13 7l5 5-5 5"/></svg>
+          <span class="hide-sm" data-i18n="link.flow">Flujo de valor</span>
+        </button>
+        <button class="btn" data-link="dependency">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 3"><path d="M3 12h14"/><path d="M13 7l5 5-5 5" stroke-dasharray="0"/></svg>
+          <span class="hide-sm" data-i18n="link.dependency">Dependencia</span>
+        </button>
+        <button class="btn" data-link="alignment">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 3"/></svg>
+          <span class="hide-sm" data-i18n="link.alignment">Alineación</span>
+        </button>
+      </div>
+
+      <div class="float" id="zoombar">
+        <button class="btn icon" id="zoom-out" aria-label="Alejar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg>
+        </button>
+        <span id="zoomval">100%</span>
+        <button class="btn icon" id="zoom-in" aria-label="Acercar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <button class="btn icon" id="zoom-fit" aria-label="Ajustar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/></svg>
+        </button>
+      </div>
+
+      <div class="float" id="hintbar">
+        <div><kbd>Scroll</kbd> zoom · <kbd data-i18n="hint.drag">Arrastrar</kbd> <span data-i18n="hint.pan">mover lienzo</span></div>
+        <div><kbd>Del</kbd> <span data-i18n="hint.del">borrar</span> · <kbd>Ctrl</kbd>+<kbd>Z</kbd> <span data-i18n="hint.undo">deshacer</span></div>
+        <div><kbd>Esc</kbd> <span data-i18n="hint.esc">cancelar conexión</span></div>
+      </div>
+    </main>
+
+    <!-- ── Inspector ── -->
+    <aside id="inspector" class="panel">
+      <div id="insp-content"></div>
+    </aside>
+
+    <nav id="mobile-tabs">
+      <button data-tab="left">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="3.5"/><rect x="3" y="14" width="7" height="7" rx="3.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span data-i18n="tabs.patterns">Patrones</span>
+      </button>
+      <button data-tab="canvas" class="on">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M3 9h18M9 21V9"/></svg>
+        <span data-i18n="tabs.canvas">Lienzo</span>
+      </button>
+      <button data-tab="right">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+        <span data-i18n="tabs.data">Datos</span>
+      </button>
+    </nav>
+  </div>
+</div>
+
+<div id="tour" aria-live="polite">
+  <div id="tour-catch"></div>
+  <div id="tour-hole"></div>
+  <div id="tour-card" role="dialog" aria-modal="true">
+    <div id="tour-arrow" class="none"></div>
+    <div id="tour-inner"></div>
+  </div>
+</div>
+
+<div id="modal-bg"><div class="modal" id="modal"></div></div>
+<div id="toast-wrap"></div>
+<input type="file" id="file-input" accept="application/json,.json" style="display:none">
+
+<script>
+'use strict';
+(function(){
+
+/* ══════════════════════════════════════════════════════════════
+   1 · ICONOGRAFÍA SVG EMBEBIDA (24×24, trazo)
+   ══════════════════════════════════════════════════════════════ */
+const ICONS = {
+  valueStream : '<path d="M2 12h6"/><path d="M8 7l5 5-5 5"/><path d="M14.5 7l5 5-5 5"/>',
+  experience  : '<circle cx="8.5" cy="8" r="3"/><path d="M2.5 19.5a6 6 0 0 1 12 0"/><path d="M19 4.6a2.2 2.2 0 0 0-3.1 0l-.4.4-.4-.4a2.2 2.2 0 1 0-3.1 3.1l3.5 3.5 3.5-3.5a2.2 2.2 0 0 0 0-3.1z"/>',
+  facilitation: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.6"/><path d="M5.6 5.6l3.9 3.9M14.5 14.5l3.9 3.9M18.4 5.6l-3.9 3.9M9.5 14.5l-3.9 3.9"/>',
+  capability  : '<path d="M12 2.6l2.7 5.6 6.1.9-4.4 4.3 1.1 6.1L12 16.6 6.5 19.5l1.1-6.1L3.2 9.1l6.1-.9z"/>',
+  platform    : '<path d="M12 2.6l9 4.8-9 4.8-9-4.8z"/><path d="M3 12.2l9 4.8 9-4.8"/><path d="M3 16.8l9 4.8 9-4.8"/>',
+  governance  : '<path d="M12 2.6l7.5 3.2v5.4c0 4.6-3.1 8.7-7.5 10.2-4.4-1.5-7.5-5.6-7.5-10.2V5.8z"/><path d="M9 12l2.2 2.2L15.5 10"/>',
+  partnership : '<path d="M10 13a4 4 0 0 0 5.7 0l3-3a4 4 0 1 0-5.7-5.7L11.6 6"/><path d="M14 11a4 4 0 0 0-5.7 0l-3 3A4 4 0 0 0 11 19.7l1.3-1.3"/>',
+  base        : '<path d="M3 10.5L12 3l9 7.5"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.5"/><path d="M9.5 21v-6h5v6"/>',
+  turf        : '<path d="M3.2 7.4l5.6-2.6 6.4 2.6 5.6-2.6v11.8l-5.6 2.6-6.4-2.6-5.6 2.6z"/><path d="M8.8 4.8v14.4M15.2 7.4v14.4"/>',
+  forum       : '<path d="M21 11.6a8.4 8.4 0 0 1-9.1 8.4 9 9 0 0 1-4-.9L3 20.6l1.5-4.7A8.4 8.4 0 0 1 12 3.2a8.4 8.4 0 0 1 9 8.4z"/><path d="M8.4 11.6h.01M12 11.6h.01M15.6 11.6h.01"/>',
+  league      : '<path d="M7 3.5h10v4.6a5 5 0 0 1-10 0z"/><path d="M7 5.5H4.4a2.6 2.6 0 0 0 2.6 5.2"/><path d="M17 5.5h2.6a2.6 2.6 0 0 1-2.6 5.2"/><path d="M12 13.2v3.6"/><path d="M8.2 20.8h7.6l-.8-4H9z"/>',
+  cluster     : '<rect x="2.5" y="6" width="7.2" height="7.2" rx="1.9"/><rect x="11.5" y="2.8" width="7.2" height="7.2" rx="1.9"/><rect x="8.2" y="13.6" width="7.2" height="7.2" rx="1.9"/>',
+  assembly    : '<circle cx="12" cy="5" r="2.4"/><circle cx="5" cy="18" r="2.4"/><circle cx="19" cy="18" r="2.4"/><path d="M10.7 7.1L6.3 15.8M13.3 7.1l4.4 8.7M7.4 18h9.2"/>',
+  crowd       : '<circle cx="8" cy="7.6" r="2.7"/><circle cx="16.4" cy="7.6" r="2.7"/><path d="M2.4 19.2a5.6 5.6 0 0 1 11.2 0"/><path d="M14.2 14.4a5.6 5.6 0 0 1 7.4 4.8"/>',
+  coalition   : '<circle cx="8.6" cy="12" r="5.6"/><circle cx="15.4" cy="12" r="5.6"/>',
+  congress    : '<path d="M2.6 21h18.8"/><path d="M4.6 21V9.6M9.5 21V9.6M14.5 21V9.6M19.4 21V9.6"/><path d="M2 9.6h20L12 3z"/>'
+};
+const ico = (n,attrs) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"'+(attrs||'')+'>'+(ICONS[n]||'')+'</svg>';
+
+/* ══════════════════════════════════════════════════════════════
+   2 · CATÁLOGO DE PATRONES unFIX
+   Fuente: unfix.com — Structural Patterns (Crew / Base / Forum /
+   Turf Types) y Self-Similar Scaling (League · Crowd)
+   ══════════════════════════════════════════════════════════════ */
+const C = {
+  vs:'#7C5CFF', ex:'#FF6B9D', fa:'#FFC145', ca:'#FF7A45',
+  pl:'#2DD4A7', go:'#C084FC', pa:'#38BDF8',
+  base:'#F59E4B', turf:'#E3D354', forum:'#06C6C6',
+  league:'#8B5CF6', cluster:'#A78BFA', assembly:'#22D3EE',
+  crowd:'#F472B6', coalition:'#FB7185', congress:'#5EEAD4'
+};
+
+/** Familias: shape define la geometría (container = marco redimensionable). */
+const FAMILIES = {
+  base:     {shape:'container', color:C.base,     icon:'base',     w:520, h:360, url:'https://unfix.com/base-types',
+             es:{name:'Base',  tag:'Estructura de pertenencia'}, en:{name:'Base', tag:'Belonging structure'}},
+  turf:     {shape:'container', color:C.turf,     icon:'turf',     w:330, h:210, url:'https://unfix.com/turf-types',
+             es:{name:'Turf',  tag:'Territorio cultivado'},      en:{name:'Turf', tag:'Cultivated territory'}},
+  crew:     {shape:'node',      color:C.vs,       icon:'valueStream', w:240, h:120, url:'https://unfix.com/crew-types',
+             es:{name:'Crew',  tag:'Equipo con misión'},         en:{name:'Crew', tag:'Team on a mission'}},
+  forum:    {shape:'node',      color:C.forum,    icon:'forum',    w:240, h:120, url:'https://unfix.com/forum-types',
+             es:{name:'Forum', tag:'Comunidad de decisión'},     en:{name:'Forum',tag:'Decision community'}},
+  league:   {shape:'container', color:C.league,   icon:'league',   w:760, h:480, url:'https://unfix.com/league',
+             es:{name:'League',tag:'Área estratégica'},          en:{name:'League',tag:'Strategic area'}},
+  cluster:  {shape:'node',      color:C.cluster,  icon:'cluster',  w:240, h:120, url:'https://unfix.com/scaling-unfix',
+             es:{name:'Cluster',tag:'Bases agrupadas'},          en:{name:'Cluster',tag:'Grouped Bases'}},
+  assembly: {shape:'node',      color:C.assembly, icon:'assembly', w:240, h:120, url:'https://unfix.com/assemblies',
+             es:{name:'Assembly',tag:'Coordinación entre Bases'},en:{name:'Assembly',tag:'Cross-Base coordination'}},
+  crowd:    {shape:'container', color:C.crowd,    icon:'crowd',    w:980, h:600, url:'https://unfix.com/crowd',
+             es:{name:'Crowd', tag:'Conjunto de Leagues'},       en:{name:'Crowd',tag:'Set of Leagues'}},
+  coalition:{shape:'node',      color:C.coalition,icon:'coalition',w:240, h:120, url:'https://unfix.com/coalitions',
+             es:{name:'Coalition',tag:'Leagues colaborando'},    en:{name:'Coalition',tag:'Collaborating Leagues'}},
+  congress: {shape:'node',      color:C.congress, icon:'congress', w:240, h:120, url:'https://unfix.com/congresses',
+             es:{name:'Congress',tag:'Coordinación entre Leagues'},en:{name:'Congress',tag:'Cross-League coordination'}}
+};
+
+/** Subtipos por familia. `n` = nombre canónico (inglés, se mantiene en ambos idiomas). */
+const TYPES = {
+  crew:[
+    {id:'value-stream', n:'Value Stream Crew', c:C.vs, i:'valueStream', u:'https://unfix.com/value-stream-crew',
+     es:'Responsabilidad de extremo a extremo sobre un flujo de valor: desde que llega la petición del cliente hasta que se le entrega valor. Sin traspasos entre equipos.',
+     en:'End-to-end responsibility for a value stream: from the moment a customer request arrives to the moment value is delivered. No hand-overs between teams.'},
+    {id:'experience', n:'Experience Crew', c:C.ex, i:'experience', u:'https://unfix.com/experience-crew',
+     es:'Equipo de frente al cliente. Optimiza el viaje completo y la experiencia de usuario cuando hay puntos de contacto en varios productos y canales.',
+     en:'Customer-facing front team. Optimizes the whole customer journey and user experience across multiple products and channels.'},
+    {id:'facilitation', n:'Facilitation Crew', c:C.fa, i:'facilitation', u:'https://unfix.com/facilitation-crew',
+     es:'Su único propósito es ayudar a otros Crews a hacer un gran trabajo. No tiene flujo de valor propio: coaches, Scrum Masters, arquitectos, testers.',
+     en:'Its sole purpose is helping other Crews do a great job. It has no value stream of its own: coaches, Scrum Masters, architects, testers.'},
+    {id:'capability', n:'Capability Crew', c:C.ca, i:'capability', u:'https://unfix.com/capability-crew',
+     es:'Especialistas escasos (machine learning, ciberseguridad, análisis de datos) que asisten temporalmente a los Value Stream Crews como miembros invitados.',
+     en:'Scarce specialists (machine learning, cyber security, data analysis) who temporarily assist Value Stream Crews as guest members.'},
+    {id:'platform', n:'Platform Crew', c:C.pl, i:'platform', u:'https://unfix.com/platform-crew',
+     es:'Ofrece servicios compartidos al resto de Crews de la Base: arquitectura, infraestructura y APIs — o servicios humanos como legal, L&D o facilities.',
+     en:'Offers shared services to the other Crews in the Base: architecture, infrastructure and APIs — or human services such as legal, L&D or facilities.'},
+    {id:'governance', n:'Governance Crew', c:C.go, i:'governance', u:'https://unfix.com/governance-crew',
+     es:'El equipo de gestión, formado por Chiefs. Fija visión, propósito y modelo de negocio, y define las restricciones a la auto-organización de la Base.',
+     en:'The management team, made of Chiefs. Sets vision, purpose and business model, and defines the constraints on self-organization in the Base.'},
+    {id:'partnership', n:'Partnership Crew', c:C.pa, i:'partnership', u:'https://unfix.com/partnership-crew',
+     es:'Como el Experience Crew, pero enfocado a proveedores, socios, freelancers y empleados: toda entidad con la que la empresa firma contratos.',
+     en:'Like the Experience Crew, but focused on vendors, partners, freelancers and employees: any entity the company signs contracts with.'}
+  ],
+  base:[
+    {id:'fully-integrated', n:'Fully Integrated Base', c:C.base, i:'base', u:'https://unfix.com/fully-integrated-base',
+     es:'Los Crews son plenamente interdependientes: comparten un mismo producto, cadencia y hoja de ruta. Máxima integración.',
+     en:'Crews are fully interdependent: they share one product, cadence and roadmap. Maximum integration.'},
+    {id:'strongly-aligned', n:'Strongly Aligned Base', c:C.base, i:'base', u:'https://unfix.com/strongly-aligned-base',
+     es:'Productos o servicios distintos pero muy relacionados. Alineación fuerte y coordinación frecuente entre Crews.',
+     en:'Distinct but closely related products or services. Strong alignment and frequent coordination between Crews.'},
+    {id:'loosely-aligned', n:'Loosely Aligned Base', c:C.base, i:'base', u:'https://unfix.com/loosely-aligned-base',
+     es:'Flujos de valor bastante independientes que comparten mercado, tecnología o marca. Coordinación ligera.',
+     en:'Fairly independent value streams sharing a market, technology or brand. Light coordination.'},
+    {id:'fully-segregated', n:'Fully Segregated Base', c:C.base, i:'base', u:'https://unfix.com/fully-segregated-base',
+     es:'Negocios separados que solo comparten la Base como hogar y sus servicios de soporte. Mínima interdependencia.',
+     en:'Separate businesses sharing only the Base as a home and its support services. Minimal interdependence.'}
+  ],
+  turf:[
+    {id:'team-of-teams', n:'Team of Teams', c:C.turf, i:'turf', u:'https://unfix.com/team-of-teams',
+     es:'Varios Crews cuidan colectivamente un mismo territorio, sin manager asignado. Reteaming interno sin pérdida de velocidad.',
+     en:'Several Crews collectively look after one territory, with no manager assigned. Internal reteaming without losing velocity.'},
+    {id:'house', n:'House', c:C.turf, i:'turf', u:'https://unfix.com/house',
+     es:'Un espacio o instalación —física o lógica— cultivada y protegida por el mismo grupo de personas.',
+     en:'A space or facility — physical or logical — cultivated and protected by the same group of people.'},
+    {id:'product-area', n:'Product Area', c:C.turf, i:'turf', u:'https://unfix.com/product-area',
+     es:'Un área de producto (código, stack, dominio) con propiedad clara y carga cognitiva acotada. Vigila el maintenance drag.',
+     en:'A product area (codebase, stack, domain) with clear ownership and bounded cognitive load. Watch out for maintenance drag.'},
+    {id:'business-unit', n:'Business Unit', c:C.turf, i:'turf', u:'https://unfix.com/business-unit',
+     es:'Una unidad de negocio con su propia cuenta de resultados dentro de la Base. No debe convertirse en un silo con manager.',
+     en:'A business unit with its own P&L inside the Base. It must not become a silo with a manager.'}
+  ],
+  forum:[
+    {id:'business-model', n:'Business Model Forum', c:C.forum, i:'forum', u:'https://unfix.com/business-model-forum',
+     es:'Debate sobre modelos de negocio, precios y propuestas de valor entre personas de distintos Crews.',
+     en:'Discussion on business models, pricing and value propositions across Crews.'},
+    {id:'channel', n:'Channel Forum', c:C.forum, i:'forum', u:'https://unfix.com/channel-forum',
+     es:'Coordina los canales de llegada al cliente: web, tienda, app, partners, soporte.',
+     en:'Coordinates the routes to the customer: web, store, app, partners, support.'},
+    {id:'customer-journey', n:'Customer Journey Forum', c:C.forum, i:'forum', u:'https://unfix.com/customer-journey-forum',
+     es:'Alinea a quienes tocan el viaje del cliente para que la experiencia sea coherente de punta a punta.',
+     en:'Aligns everyone touching the customer journey so the experience is coherent end to end.'},
+    {id:'functional', n:'Functional Forum', c:C.forum, i:'forum', u:'https://unfix.com/functional-forum',
+     es:'Reúne a personas de la misma disciplina (chapter, guild, comunidad de práctica) para compartir criterio y estándares.',
+     en:'Brings together people from the same discipline (chapter, guild, community of practice) to share craft and standards.'},
+    {id:'market', n:'Market Forum', c:C.forum, i:'forum', u:'https://unfix.com/market-forum',
+     es:'Discute segmentos, competencia y oportunidades de mercado que afectan a varios flujos de valor.',
+     en:'Discusses segments, competition and market opportunities affecting several value streams.'},
+    {id:'organizational', n:'Organizational Forum', c:C.forum, i:'forum', u:'https://unfix.com/organizational-forum',
+     es:'Trata la propia forma de organizarse: estructura, reteaming, políticas y ways of working.',
+     en:'Deals with how the organization organizes itself: structure, reteaming, policies and ways of working.'},
+    {id:'product', n:'Product Forum', c:C.forum, i:'forum', u:'https://unfix.com/product-forum',
+     es:'Coordina hoja de ruta, dependencias y decisiones de producto entre Crews.',
+     en:'Coordinates roadmap, dependencies and product decisions across Crews.'},
+    {id:'regional', n:'Regional Forum', c:C.forum, i:'forum', u:'https://unfix.com/regional-forum',
+     es:'Agrupa a quienes comparten geografía, idioma o marco regulatorio.',
+     en:'Groups those sharing a geography, language or regulatory framework.'},
+    {id:'seasonal', n:'Seasonal Forum', c:C.forum, i:'forum', u:'https://unfix.com/seasonal-forum',
+     es:'Se crea y disuelve alrededor de un pico o campaña: rebajas, cierre fiscal, temporada alta.',
+     en:'Created and dissolved around a peak or campaign: sales, fiscal close, high season.'},
+    {id:'technological', n:'Technological Forum', c:C.forum, i:'forum', u:'https://unfix.com/technological-forum',
+     es:'Decide sobre stack, arquitectura, herramientas y estándares técnicos compartidos.',
+     en:'Decides on shared stack, architecture, tooling and technical standards.'}
+  ],
+  league:[
+    {id:'league', n:'League', c:C.league, i:'league', u:'https://unfix.com/league',
+     es:'Docenas de Bases colaboran en una League, organizada en torno a flujos de valor codependientes o experiencias de cliente relacionadas. Tiene su propio Governance Cluster.',
+     en:'Dozens of Bases collaborate in a League, organized around co-dependent value streams or related customer experiences. It has its own Governance Cluster.'}
+  ],
+  cluster:[
+    {id:'value-stream', n:'Value Stream Cluster', c:C.vs, i:'valueStream', u:'https://unfix.com/scaling-unfix',
+     es:'Bases que se auto-organizan alrededor de flujos de valor codependientes dentro de la League.',
+     en:'Bases self-organizing around co-dependent value streams inside the League.'},
+    {id:'experience', n:'Experience Cluster', c:C.ex, i:'experience', u:'https://unfix.com/scaling-unfix',
+     es:'Bases orientadas a la experiencia de cliente en el nivel League.',
+     en:'Bases oriented to customer experience at League level.'},
+    {id:'facilitation', n:'Facilitation Cluster', c:C.fa, i:'facilitation', u:'https://unfix.com/scaling-unfix',
+     es:'Bases cuyo trabajo es habilitar al resto de Bases de la League.',
+     en:'Bases whose work is to enable the other Bases in the League.'},
+    {id:'capability', n:'Capability Cluster', c:C.ca, i:'capability', u:'https://unfix.com/scaling-unfix',
+     es:'Bases que concentran capacidades escasas y las prestan al resto de la League.',
+     en:'Bases concentrating scarce capabilities and lending them across the League.'},
+    {id:'platform', n:'Platform Cluster', c:C.pl, i:'platform', u:'https://unfix.com/scaling-unfix',
+     es:'Bases que ofrecen plataforma y servicios compartidos a toda la League.',
+     en:'Bases offering platform and shared services to the whole League.'},
+    {id:'governance', n:'Governance Cluster', c:C.go, i:'governance', u:'https://unfix.com/scaling-unfix',
+     es:'El equipo de gestión de la League: fija dirección y restricciones para todas sus Bases.',
+     en:'The League management team: sets direction and constraints for all its Bases.'},
+    {id:'partnership', n:'Partnership Cluster', c:C.pa, i:'partnership', u:'https://unfix.com/scaling-unfix',
+     es:'Bases enfocadas a proveedores, socios y talento en el nivel League.',
+     en:'Bases focused on vendors, partners and talent at League level.'}
+  ],
+  assembly:[
+    {id:'assembly', n:'Assembly', c:C.assembly, i:'assembly', u:'https://unfix.com/scaling-unfix',
+     es:'Estructura voluntaria donde representantes de varias Bases coordinan formas de trabajar más allá de una sola Base. Es el Forum del nivel League.',
+     en:'Voluntary structure where representatives from several Bases coordinate ways of working beyond a single Base. It is the League-level Forum.'}
+  ],
+  crowd:[
+    {id:'crowd', n:'Crowd', c:C.crowd, i:'crowd', u:'https://unfix.com/crowd',
+     es:'Docenas de Leagues forman un Crowd. El modelo unFIX es fractal: los mismos patrones se repiten en cada escala.',
+     en:'Dozens of Leagues form a Crowd. The unFIX model is fractal: the same patterns repeat at every scale.'}
+  ],
+  coalition:[
+    {id:'coalition', n:'Coalition', c:C.coalition, i:'coalition', u:'https://unfix.com/scaling-unfix',
+     es:'Leagues que se auto-organizan y colaboran dentro de un Crowd. Es el Cluster del nivel Crowd.',
+     en:'Leagues self-organizing and collaborating inside a Crowd. It is the Crowd-level Cluster.'}
+  ],
+  congress:[
+    {id:'congress', n:'Congress', c:C.congress, i:'congress', u:'https://unfix.com/scaling-unfix',
+     es:'Coordinación voluntaria entre Leagues dentro de un Crowd. Es el Forum del nivel Crowd.',
+     en:'Voluntary coordination between Leagues inside a Crowd. It is the Crowd-level Forum.'}
+  ]
+};
+
+/** Agrupación visual de la paleta lateral. */
+const GROUPS = [
+  {id:'crew',   fam:['crew'],   color:'#B364FA', es:{t:'Crew Types',  s:'Un Crew es un equipo pequeño con una misión y un objetivo definido. De 3 a 7 personas, sin manager dentro del equipo.'},
+                                                     en:{t:'Crew Types',  s:'A Crew is a small team on a mission with a defined goal. Three to seven people, with no manager on the Crew.'}},
+  {id:'base',   fam:['base'],   color:C.base, es:{t:'Base Types',  s:'La Base es el grupo donde las personas se sienten seguras y en casa. Sin mandos intermedios.'},
+                                               en:{t:'Base Types',  s:'The Base is the group where people feel safe and at home. No middle management.'}},
+  {id:'forum',  fam:['forum'],  color:C.forum, es:{t:'Forum Types', s:'Un Forum es un lugar para hablar y tomar decisiones importantes. Es el tejido conectivo entre Crews.'},
+                                                en:{t:'Forum Types', s:'A Forum is a place to talk and make important decisions. It is the connective tissue between Crews.'}},
+  {id:'turf',   fam:['turf'],   color:C.turf, es:{t:'Turf Types',  s:'Un Turf es un área cultivada y protegida por las mismas personas. Permite crecer la Base sin agrandar los Crews.'},
+                                               en:{t:'Turf Types',  s:'A Turf is an area cultivated and protected by the same people. It grows the Base while Crews stay small.'}},
+  {id:'scale',  fam:['league','cluster','assembly'], color:C.league,
+                es:{t:'Escalado · League', s:'Docenas de Bases colaboran en una League, forman Clusters y coordinan en Assemblies.'},
+                en:{t:'Scaling · League',  s:'Dozens of Bases collaborate in a League, form Clusters and coordinate in Assemblies.'}},
+  {id:'scale2', fam:['crowd','coalition','congress'], color:C.crowd,
+                es:{t:'Escalado · Crowd', s:'Docenas de Leagues forman un Crowd, colaboran en Coalitions y coordinan en Congresses.'},
+                en:{t:'Scaling · Crowd',  s:'Dozens of Leagues form a Crowd, collaborate in Coalitions and coordinate in Congresses.'}}
+];
+
+/* ── Estados de madurez ─────────────────────────────────────── */
+const STATES = {
+  turmoil:   {c:'#FF5A5F', bars:1, dash:'2.5 4',      es:{n:'Turmoil',    d:'Conflicto o inestabilidad. El grupo aún no ha encontrado su forma de trabajar.'},
+                                                       en:{n:'Turmoil',    d:'Conflict or instability. The group has not found its way of working yet.'}},
+  forming:   {c:'#FFB020', bars:2, dash:'9 5',        es:{n:'Forming',    d:'En constitución: misión, límites y acuerdos de equipo todavía en construcción.'},
+                                                       en:{n:'Forming',    d:'Coming together: mission, boundaries and team agreement still under construction.'}},
+  performing:{c:'#34D399', bars:4, dash:'',           es:{n:'Performing', d:'Opera de forma autónoma y fluida, entregando valor de manera sostenida.'},
+                                                       en:{n:'Performing', d:'Operating autonomously and smoothly, delivering value sustainably.'}},
+  reforming: {c:'#A78BFA', bars:3, dash:'13 4 3.5 4', es:{n:'Reforming',  d:'Dynamic reteaming en marcha: cambia composición, misión o territorio.'},
+                                                       en:{n:'Reforming',  d:'Dynamic reteaming under way: composition, mission or territory is changing.'}}
+};
+const STATE_ORDER = ['turmoil','forming','performing','reforming'];
+
+/* ── Tipos de conexión ──────────────────────────────────────── */
+const LINKS = {
+  flow:       {c:'#06C6C6', dash:'',      arrow:'end',  curve:.22, es:{n:'Flujo de valor', d:'El trabajo o el valor viaja de un elemento al siguiente.'},
+                                                                    en:{n:'Value flow',     d:'Work or value travels from one element to the next.'}},
+  dependency: {c:'#FFB020', dash:'8 5',   arrow:'end',  curve:.34, es:{n:'Dependencia',    d:'El origen necesita algo del destino para poder entregar.'},
+                                                                    en:{n:'Dependency',     d:'The source needs something from the target in order to deliver.'}},
+  alignment:  {c:'#C084FC', dash:'2.5 5', arrow:'both', curve:.46, es:{n:'Alineación',     d:'Objetivos compartidos o coordinación mutua, sin dirección de trabajo.'},
+                                                                    en:{n:'Alignment',      d:'Shared objectives or mutual coordination, with no direction of work.'}}
+};
+
+/* ══════════════════════════════════════════════════════════════
+   3 · INTERNACIONALIZACIÓN
+   ══════════════════════════════════════════════════════════════ */
+const I18N = {
+es:{
+ 'brand.sub':'Organization Design','tb.diag':'Diagnóstico','tb.example':'Ejemplo','tb.clear':'Vaciar',
+ 'tb.import':'Importar','tb.export':'Exportar','tb.tour':'Guía',
+ 'tour.skip':'Saltar guía','tour.prev':'Atrás','tour.next':'Siguiente','tour.done':'Empezar a diseñar',
+ 'tour.finished':'¡Listo! Ya puedes diseñar','tour.open':'Ver la guía paso a paso','side.title':'Biblioteca de patrones','side.search':'Buscar patrón…',
+ 'legend.title':'Leyenda','legend.links':'Conexiones','legend.states':'Madurez','link.flow':'Flujo de valor','link.dependency':'Dependencia',
+ 'link.alignment':'Alineación','tool.select':'Seleccionar','hint.drag':'Arrastrar','hint.pan':'mover lienzo','hint.del':'borrar',
+ 'hint.undo':'deshacer','hint.esc':'cancelar conexión','tabs.patterns':'Patrones','tabs.canvas':'Lienzo','tabs.data':'Datos',
+ 'undo':'Deshacer','redo':'Rehacer',
+ 'insp.empty.t':'Nada seleccionado','insp.empty.d':'Haz clic en un elemento del lienzo para editar su nombre, misión, tipo y estado de madurez. O añade uno desde la biblioteca de la izquierda.',
+ 'insp.name':'Nombre','insp.mission':'Misión / propósito','insp.type':'Tipo de patrón','insp.state':'Estado de madurez',
+ 'insp.people':'Personas','insp.lead':'Rol de liderazgo','insp.notes':'Notas','insp.links':'Conexiones',
+ 'insp.nolinks':'Sin conexiones todavía. Usa la barra inferior del lienzo para conectar elementos.',
+ 'insp.delete':'Eliminar','insp.duplicate':'Duplicar','insp.focus':'Centrar','insp.learn':'Ver en unfix.com',
+ 'insp.parent':'Contenido en','insp.parent.none':'— Suelto en el lienzo —',
+ 'ph.name':'Nombre del elemento','ph.mission':'¿Cuál es su misión?','ph.lead':'Captain, Chair, Chief…','ph.notes':'Acuerdos, restricciones, dependencias…',
+ 'warn.crewsize':'unFIX recomienda de 3 a 7 personas por Crew.',
+ 'diag.title':'Diagnóstico del diseño','diag.close':'Cerrar','diag.none':'Sin observaciones. El diseño respeta las reglas estructurales de unFIX.',
+ 'exp.title':'Exportar diseño','exp.json':'JSON del diseño','exp.jsond':'Estructura completa, reimportable en esta herramienta.',
+ 'exp.png':'Imagen PNG','exp.pngd':'Captura del lienzo a doble resolución, con fondo.',
+ 'exp.svg':'Vector SVG','exp.svgd':'Gráfico vectorial editable en Figma, Illustrator o Inkscape.',
+ 'help.title':'Cómo usar el diseñador',
+ 'toast.added':'Elemento añadido','toast.deleted':'Elemento eliminado','toast.linked':'Conexión creada',
+ 'toast.imported':'Diseño importado','toast.exported':'Archivo descargado','toast.cleared':'Lienzo vacío',
+ 'toast.example':'Ejemplo cargado','toast.badfile':'El archivo no es un diseño unFIX válido',
+ 'toast.selfLink':'Un elemento no puede conectarse consigo mismo','toast.dupLink':'Esa conexión ya existe',
+ 'toast.linkstart':'Elige el elemento de destino','toast.nothing':'No hay nada que exportar',
+ 'confirm.clear':'¿Vaciar el lienzo? Se perderá el diseño actual.',
+ 'connect.hint':'Conectando…','cancel':'Cancelar'
+},
+en:{
+ 'brand.sub':'Organization Design','tb.diag':'Diagnostics','tb.example':'Example','tb.clear':'Clear',
+ 'tb.import':'Import','tb.export':'Export','tb.tour':'Guide',
+ 'tour.skip':'Skip guide','tour.prev':'Back','tour.next':'Next','tour.done':'Start designing',
+ 'tour.finished':'All set — start designing','tour.open':'Open the step-by-step guide','side.title':'Pattern library','side.search':'Search pattern…',
+ 'legend.title':'Legend','legend.links':'Connections','legend.states':'Maturity','link.flow':'Value flow','link.dependency':'Dependency',
+ 'link.alignment':'Alignment','tool.select':'Select','hint.drag':'Drag','hint.pan':'pan canvas','hint.del':'delete',
+ 'hint.undo':'undo','hint.esc':'cancel link','tabs.patterns':'Patterns','tabs.canvas':'Canvas','tabs.data':'Data',
+ 'undo':'Undo','redo':'Redo',
+ 'insp.empty.t':'Nothing selected','insp.empty.d':'Click an element on the canvas to edit its name, mission, type and maturity state. Or add one from the library on the left.',
+ 'insp.name':'Name','insp.mission':'Mission / purpose','insp.type':'Pattern type','insp.state':'Maturity state',
+ 'insp.people':'People','insp.lead':'Leadership role','insp.notes':'Notes','insp.links':'Connections',
+ 'insp.nolinks':'No connections yet. Use the bottom canvas bar to connect elements.',
+ 'insp.delete':'Delete','insp.duplicate':'Duplicate','insp.focus':'Center','insp.learn':'View on unfix.com',
+ 'insp.parent':'Contained in','insp.parent.none':'— Loose on canvas —',
+ 'ph.name':'Element name','ph.mission':'What is its mission?','ph.lead':'Captain, Chair, Chief…','ph.notes':'Agreements, constraints, dependencies…',
+ 'warn.crewsize':'unFIX recommends three to seven people per Crew.',
+ 'diag.title':'Design diagnostics','diag.close':'Close','diag.none':'No findings. The design respects the unFIX structural rules.',
+ 'exp.title':'Export design','exp.json':'Design JSON','exp.jsond':'Full structure, re-importable into this tool.',
+ 'exp.png':'PNG image','exp.pngd':'Canvas capture at double resolution, with background.',
+ 'exp.svg':'SVG vector','exp.svgd':'Vector graphic editable in Figma, Illustrator or Inkscape.',
+ 'help.title':'How to use the designer',
+ 'toast.added':'Element added','toast.deleted':'Element deleted','toast.linked':'Connection created',
+ 'toast.imported':'Design imported','toast.exported':'File downloaded','toast.cleared':'Canvas cleared',
+ 'toast.example':'Example loaded','toast.badfile':'That file is not a valid unFIX design',
+ 'toast.selfLink':'An element cannot connect to itself','toast.dupLink':'That connection already exists',
+ 'toast.linkstart':'Pick the target element','toast.nothing':'Nothing to export',
+ 'confirm.clear':'Clear the canvas? The current design will be lost.',
+ 'connect.hint':'Connecting…','cancel':'Cancel'
+}};
+
+let LANG = 'es';
+const t = k => (I18N[LANG][k] !== undefined ? I18N[LANG][k] : (I18N.es[k] || k));
+
+/* ══════════════════════════════════════════════════════════════
+   4 · ESTADO DE LA APLICACIÓN
+   ══════════════════════════════════════════════════════════════ */
+const uid = p => (p||'n') + '_' + Math.random().toString(36).slice(2,9);
+
+let S = {
+  title:'Mi Organización',
+  nodes:[],
+  links:[],
+  view:{x:0,y:0,k:1}
+};
+let sel = null;            // id seleccionado
+let linkMode = null;       // 'flow' | 'dependency' | 'alignment' | null
+let linkFrom = null;       // id origen mientras se conecta
+let history = [], future = [];
+
+const $  = s => document.querySelector(s);
+const $$ = s => Array.prototype.slice.call(document.querySelectorAll(s));
+const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const clone = o => JSON.parse(JSON.stringify(o));
+
+const famOf   = n => FAMILIES[n.fam];
+const typesOf = fam => TYPES[fam] || [];
+const typeOf  = n => (typesOf(n.fam).filter(x=>x.id===n.type)[0]) || typesOf(n.fam)[0] || null;
+const isContainer = n => famOf(n).shape === 'container';
+const nodeById = id => S.nodes.filter(n=>n.id===id)[0] || null;
+const colorOf = n => { const ty = typeOf(n); return (ty && ty.c) || famOf(n).color; };
+const iconOf  = n => { const ty = typeOf(n); return (ty && ty.i) || famOf(n).icon; };
+const labelOf = n => { const ty = typeOf(n); return ty ? ty.n : famOf(n)[LANG].name; };
+const descOf  = n => { const ty = typeOf(n); return ty ? ty[LANG] : ''; };
+
+function pushHistory(){
+  history.push(JSON.stringify({nodes:S.nodes,links:S.links,title:S.title}));
+  if(history.length>60) history.shift();
+  future.length = 0;
+  refreshUndo();
+}
+function refreshUndo(){
+  $('#btn-undo').disabled = history.length===0;
+  $('#btn-redo').disabled = future.length===0;
+}
+function applySnapshot(str){
+  const d = JSON.parse(str);
+  S.nodes = d.nodes; S.links = d.links; S.title = d.title;
+  $('#doc-name').value = S.title;
+  if(sel && !nodeById(sel)) sel = null;
+  render(); renderInspector(); runDiagnostics();
+}
+function undo(){
+  if(!history.length) return;
+  future.push(JSON.stringify({nodes:S.nodes,links:S.links,title:S.title}));
+  applySnapshot(history.pop()); refreshUndo();
+}
+function redo(){
+  if(!future.length) return;
+  history.push(JSON.stringify({nodes:S.nodes,links:S.links,title:S.title}));
+  applySnapshot(future.pop()); refreshUndo();
+}
+
+/* Persistencia opcional (silenciosa si el navegador la bloquea) */
+function saveLocal(){
+  try{ localStorage.setItem('unfix-designer-v1', JSON.stringify({title:S.title,nodes:S.nodes,links:S.links,view:S.view,lang:LANG})); }catch(e){}
+}
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem('unfix-designer-v1');
+    if(!raw) return false;
+    const d = JSON.parse(raw);
+    if(!d || !Array.isArray(d.nodes) || !d.nodes.length) return false;
+    S.title = d.title || S.title; S.nodes = d.nodes; S.links = d.links||[];
+    if(d.view) S.view = d.view;
+    if(d.lang) LANG = d.lang;
+    return true;
+  }catch(e){ return false; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   5 · UTILIDADES DE TEXTO Y COLOR
+   ══════════════════════════════════════════════════════════════ */
+const FONT = 'Space Grotesk, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif';
+const _mc = document.createElement('canvas').getContext('2d');
+function measure(txt, font){ _mc.font = font; return _mc.measureText(txt).width; }
+function ellipsis(txt, maxW, font){
+  if(measure(txt,font) <= maxW) return txt;
+  let s = txt;
+  while(s.length > 1 && measure(s+'…',font) > maxW) s = s.slice(0,-1);
+  return s.replace(/\s+$/,'')+'…';
+}
+function wrap(txt, maxW, font, maxLines){
+  const words = String(txt||'').trim().split(/\s+/).filter(Boolean);
+  if(!words.length) return [];
+  const lines = []; let cur = '';
+  for(let i=0;i<words.length;i++){
+    const test = cur ? cur+' '+words[i] : words[i];
+    if(measure(test,font) <= maxW){ cur = test; }
+    else{
+      if(cur) lines.push(cur);
+      cur = words[i];
+      if(lines.length === maxLines-1){
+        const rest = words.slice(i).join(' ');
+        lines.push(ellipsis(rest,maxW,font));
+        return lines;
+      }
+    }
+  }
+  if(cur) lines.push(cur);
+  return lines.slice(0,maxLines);
+}
+function hexA(hex,a){
+  const h = hex.replace('#','');
+  const r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
+  return 'rgba('+r+','+g+','+b+','+a+')';
+}
+
+/* ══════════════════════════════════════════════════════════════
+   6 · LIENZO SVG — estructura base y defs
+   ══════════════════════════════════════════════════════════════ */
+const svg = $('#canvas');
+
+function buildCanvasShell(){
+  let markers = '';
+  Object.keys(LINKS).forEach(function(k){
+    const L = LINKS[k];
+    markers +=
+      '<marker id="ar-'+k+'" viewBox="0 0 12 12" refX="9.4" refY="6" markerWidth="6.4" markerHeight="6.4" orient="auto-start-reverse">'+
+        '<path d="M1.6 1.6 L10 6 L1.6 10.4 Z" fill="'+L.c+'"/></marker>'+
+      '<marker id="arS-'+k+'" viewBox="0 0 12 12" refX="2.6" refY="6" markerWidth="6.4" markerHeight="6.4" orient="auto">'+
+        '<path d="M10.4 1.6 L2 6 L10.4 10.4 Z" fill="'+L.c+'"/></marker>';
+  });
+  let symbols = '';
+  Object.keys(ICONS).forEach(function(k){
+    symbols += '<symbol id="sy-'+k+'" viewBox="0 0 24 24">'+ICONS[k]+'</symbol>';
+  });
+  svg.innerHTML =
+    '<defs>'+
+      markers + symbols +
+      '<filter id="fShadow" x="-40%" y="-40%" width="180%" height="200%">'+
+        '<feDropShadow dx="0" dy="7" stdDeviation="9" flood-color="#000" flood-opacity=".48"/></filter>'+
+      '<filter id="fGlow" x="-60%" y="-60%" width="220%" height="220%">'+
+        '<feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
+      '<filter id="fSoft" x="-30%" y="-30%" width="160%" height="170%">'+
+        '<feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity=".38"/></filter>'+
+    '</defs>'+
+    '<g id="vp">'+
+      '<g id="l-cont"></g><g id="l-link"></g><g id="l-node"></g><g id="l-ov" style="pointer-events:none"></g>'+
+    '</g>';
+}
+buildCanvasShell();
+const VP = () => document.getElementById('vp');
+
+function applyView(){
+  VP().setAttribute('transform','translate('+S.view.x+','+S.view.y+') scale('+S.view.k+')');
+  $('#zoomval').textContent = Math.round(S.view.k*100)+'%';
+  const g = $('#grid');
+  const sz = 32*S.view.k;
+  g.style.backgroundSize = sz+'px '+sz+'px';
+  g.style.backgroundPosition = (S.view.x%sz)+'px '+(S.view.y%sz)+'px';
+}
+function toWorld(cx,cy){
+  const r = svg.getBoundingClientRect();
+  return {x:(cx-r.left-S.view.x)/S.view.k, y:(cy-r.top-S.view.y)/S.view.k};
+}
+function viewCenterWorld(){
+  const r = svg.getBoundingClientRect();
+  return toWorld(r.left+r.width/2, r.top+r.height/2);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   7 · RENDER DE ELEMENTOS
+   ══════════════════════════════════════════════════════════════ */
+const seen = Object.create(null);   // ids ya animados
+
+function stateBars(st, x, y, col){
+  const bars = STATES[st].bars; let out = '';
+  for(let i=0;i<4;i++){
+    out += '<rect x="'+(x+i*15)+'" y="'+y+'" width="11.5" height="3.4" rx="1.7" fill="'+
+           (i<bars? col : 'rgba(255,255,255,.14)')+'"/>';
+  }
+  return out;
+}
+function peopleGlyph(n, xRight, y, col){
+  if(!n || n<1) return '';
+  const shown = Math.min(n,7); let out=''; let x = xRight - shown*8.6;
+  for(let i=0;i<shown;i++){
+    out += '<circle cx="'+(x+i*8.6)+'" cy="'+y+'" r="3" fill="'+col+'" opacity="'+(0.45+0.08*i)+'"/>';
+  }
+  if(n>7) out += '<text x="'+(xRight+5)+'" y="'+(y+3.4)+'" class="node-meta" fill="'+col+'">+'+(n-7)+'</text>';
+  return out;
+}
+
+function renderNode(n){
+  const col = colorOf(n), st = STATES[n.state] || STATES.forming;
+  const W = n.w, H = n.h;
+  const fTitle = '600 13.5px '+FONT, fMis = '400 10.5px '+FONT;
+  const badge = (n.state==='turmoil'||n.state==='reforming') ? 28 : 0;
+  const title = ellipsis(n.name || labelOf(n), W-52-14-badge, fTitle);
+  const kind  = ellipsis((labelOf(n)||'').toUpperCase(), W-52-14-badge, '700 9px '+FONT);
+  const mis   = wrap(n.mission, W-28, fMis, 2);
+  const isSel = sel === n.id;
+
+  let s = '<g class="node-g st-'+n.state+(seen[n.id]?'':' enter')+'" data-id="'+n.id+'" transform="translate('+n.x+','+n.y+')">';
+  s += '<g class="shell">';
+  s += '<rect width="'+W+'" height="'+H+'" rx="16" fill="#15152a" filter="url(#fShadow)"/>';
+  s += '<rect width="'+W+'" height="'+H+'" rx="16" fill="'+hexA(col,.13)+'"/>';
+  s += '<rect x=".9" y=".9" width="'+(W-1.8)+'" height="'+(H-1.8)+'" rx="15.2" fill="none" stroke="'+hexA(col,isSel?.95:.5)+'" stroke-width="'+(isSel?2:1.4)+'"'+(st.dash?' stroke-dasharray="'+st.dash+'"':'')+'/>';
+  // chip de icono
+  s += '<rect x="13" y="13" width="30" height="30" rx="9.5" fill="'+hexA(col,.22)+'" stroke="'+hexA(col,.45)+'" stroke-width="1"/>';
+  s += '<use href="#sy-'+iconOf(n)+'" x="20" y="20" width="16" height="16" fill="none" stroke="'+col+'" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>';
+  // textos
+  s += '<text x="52" y="26.5" class="node-title">'+esc(title)+'</text>';
+  s += '<text x="52" y="39.5" class="node-kind" fill="'+hexA(col,.9)+'">'+esc(kind)+'</text>';
+  mis.forEach(function(l,i){ s += '<text x="14" y="'+(62+i*13.5)+'" class="node-mission">'+esc(l)+'</text>'; });
+  // pie: madurez + personas
+  s += stateBars(n.state, 14, H-19, st.c);
+  s += '<text x="14" y="'+(H-24)+'" class="node-meta" fill="'+hexA(st.c,.92)+'">'+esc(st[LANG].n.toUpperCase())+'</text>';
+  s += peopleGlyph(n.people, W-15, H-17.5, col);
+  if(n.state==='reforming'){
+    s += '<g class="reform-spin" transform="translate('+(W-24)+',24)"><path d="M-6 0a6 6 0 1 1 2.2 4.6" fill="none" stroke="'+hexA(st.c,.85)+'" stroke-width="1.7" stroke-linecap="round"/><path d="M-4.6 6.4l.8-3.4 3.3.9" fill="none" stroke="'+hexA(st.c,.85)+'" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>';
+  }
+  if(n.state==='turmoil'){
+    s += '<g transform="translate('+(W-25)+',16)"><path d="M8 0L16 14H0z" fill="none" stroke="'+hexA(st.c,.9)+'" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 5.5v4M8 11.6h.01" stroke="'+hexA(st.c,.9)+'" stroke-width="1.6" stroke-linecap="round"/></g>';
+  }
+  s += '</g></g>';
+  seen[n.id] = 1;
+  return s;
+}
+
+function renderContainer(n){
+  const col = colorOf(n), st = STATES[n.state] || STATES.forming;
+  const W = n.w, H = n.h;
+  const fT = '700 16px '+FONT;
+  const title = ellipsis(n.name || labelOf(n), W-72-120, fT);
+  const isSel = sel === n.id;
+  const kids = S.nodes.filter(x=>x.parent===n.id).length;
+
+  let s = '<g class="cont-g node-g st-'+n.state+(seen[n.id]?'':' enter')+'" data-id="'+n.id+'" transform="translate('+n.x+','+n.y+')">';
+  s += '<g class="shell">';
+  s += '<rect width="'+W+'" height="'+H+'" rx="24" fill="'+hexA(col,.055)+'"/>';
+  s += '<rect x="1.1" y="1.1" width="'+(W-2.2)+'" height="'+(H-2.2)+'" rx="23" fill="none" stroke="'+hexA(col,isSel?.9:.4)+'" stroke-width="'+(isSel?2.4:1.6)+'"'+(st.dash?' stroke-dasharray="'+st.dash+'"':'')+'/>';
+  // banda de cabecera
+  s += '<path d="M0 24 A24 24 0 0 1 24 0 H'+(W-24)+' A24 24 0 0 1 '+W+' 24 V66 H0 Z" fill="'+hexA(col,.11)+'"/>';
+  s += '<path d="M0 66 H'+W+'" stroke="'+hexA(col,.24)+'" stroke-width="1"/>';
+  s += '<rect x="18" y="16" width="34" height="34" rx="11" fill="'+hexA(col,.24)+'" stroke="'+hexA(col,.48)+'" stroke-width="1"/>';
+  s += '<use href="#sy-'+iconOf(n)+'" x="26" y="24" width="18" height="18" fill="none" stroke="'+col+'" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>';
+  s += '<text x="62" y="31" class="cont-title">'+esc(title)+'</text>';
+  s += '<text x="62" y="45" class="cont-kind" fill="'+hexA(col,.88)+'">'+esc((labelOf(n)||'').toUpperCase())+'</text>';
+  // metadatos a la derecha de la cabecera
+  s += stateBars(n.state, W-78, 24, st.c);
+  s += '<text x="'+(W-18)+'" y="47" text-anchor="end" class="cont-sub" fill="'+hexA(st.c,.9)+'">'+esc(st[LANG].n)+'</text>';
+  if(kids) s += '<text x="'+(W-88)+'" y="47" text-anchor="end" class="cont-sub" fill="'+hexA(col,.7)+'">'+kids+' ×</text>';
+  if(n.people) s += '<text x="'+(W-88)+'" y="31" text-anchor="end" class="cont-sub" fill="'+hexA(col,.7)+'">'+n.people+' ppl</text>';
+  s += '</g>';
+  if(isSel){
+    s += '<g class="rz-handle" data-rz="'+n.id+'" style="cursor:nwse-resize">'+
+         '<rect x="'+(W-26)+'" y="'+(H-26)+'" width="22" height="22" rx="6" fill="'+hexA(col,.3)+'" stroke="'+hexA(col,.8)+'" stroke-width="1.2"/>'+
+         '<path d="M'+(W-19)+' '+(H-8)+' L'+(W-8)+' '+(H-19)+' M'+(W-13)+' '+(H-8)+' L'+(W-8)+' '+(H-13)+'" stroke="'+col+'" stroke-width="1.6" stroke-linecap="round"/></g>';
+  }
+  s += '</g>';
+  seen[n.id] = 1;
+  return s;
+}
+
+function anchorOn(n, tx, ty){
+  const cx = n.x+n.w/2, cy = n.y+n.h/2;
+  const dx = tx-cx, dy = ty-cy;
+  if(!dx && !dy) return {x:cx,y:cy};
+  const hw = n.w/2+3, hh = n.h/2+3;
+  const sx = dx ? hw/Math.abs(dx) : Infinity;
+  const sy = dy ? hh/Math.abs(dy) : Infinity;
+  const k = Math.min(sx,sy);
+  return {x:cx+dx*k, y:cy+dy*k};
+}
+
+function renderLink(l){
+  const a = nodeById(l.from), b = nodeById(l.to);
+  if(!a || !b) return '';
+  const L = LINKS[l.type] || LINKS.flow;
+  const ac = {x:a.x+a.w/2,y:a.y+a.h/2}, bc = {x:b.x+b.w/2,y:b.y+b.h/2};
+  const p1 = anchorOn(a,bc.x,bc.y), p2 = anchorOn(b,ac.x,ac.y);
+  const mx = (p1.x+p2.x)/2, my = (p1.y+p2.y)/2;
+  const dx = p2.x-p1.x, dy = p2.y-p1.y;
+  const dist = Math.sqrt(dx*dx+dy*dy) || 1;
+  const off = dist * L.curve * 0.25;
+  const qx = mx - (dy/dist)*off, qy = my + (dx/dist)*off;
+  const d = 'M'+p1.x.toFixed(1)+' '+p1.y.toFixed(1)+' Q'+qx.toFixed(1)+' '+qy.toFixed(1)+' '+p2.x.toFixed(1)+' '+p2.y.toFixed(1);
+  const isSel = sel === l.id;
+  const lx = (p1.x+2*qx+p2.x)/4, ly = (p1.y+2*qy+p2.y)/4;
+
+  let s = '<g class="link-g" data-link="'+l.id+'">';
+  s += '<path d="'+d+'" fill="none" stroke="transparent" stroke-width="12" style="cursor:pointer"/>';
+  s += '<path class="lk-precise" d="'+d+'" fill="none" stroke="transparent" stroke-width="7" style="cursor:pointer"/>';
+  s += '<path d="'+d+'" fill="none" stroke="'+L.c+'" stroke-width="'+(isSel?3:1.9)+'" stroke-linecap="round"'+
+       (L.dash?' stroke-dasharray="'+L.dash+'"':'')+
+       (l.type==='flow'?' class="link-flow-anim" stroke-dasharray="14 8"':'')+
+       ' opacity="'+(isSel?1:.82)+'"'+
+       (L.arrow==='end'||L.arrow==='both' ? ' marker-end="url(#ar-'+l.type+')"' : '')+
+       (L.arrow==='both' ? ' marker-start="url(#arS-'+l.type+')"' : '')+'/>';
+  if(l.label){
+    const w = measure(l.label,'700 9px '+FONT)+14;
+    s += '<rect x="'+(lx-w/2)+'" y="'+(ly-9)+'" width="'+w+'" height="17" rx="8.5" fill="#12121f" stroke="'+hexA(L.c,.55)+'" stroke-width="1"/>';
+    s += '<text x="'+lx+'" y="'+(ly+3.2)+'" text-anchor="middle" class="link-lbl" fill="'+L.c+'">'+esc(l.label)+'</text>';
+  }
+  s += '</g>';
+  return s;
+}
+
+function renderLinks(){
+  document.getElementById('l-link').innerHTML = S.links.map(renderLink).join('');
+}
+
+function render(){
+  const conts = S.nodes.filter(isContainer);
+  const nodes = S.nodes.filter(n=>!isContainer(n));
+  // contenedores: los mayores al fondo para permitir anidamiento visual
+  conts.sort((a,b)=> (b.w*b.h)-(a.w*a.h));
+  document.getElementById('l-cont').innerHTML = conts.map(renderContainer).join('');
+  renderLinks();
+  document.getElementById('l-node').innerHTML = nodes.map(renderNode).join('');
+  document.getElementById('l-ov').innerHTML = linkFrom ? renderGhostLink() : '';
+  applyView();
+  saveLocal();
+}
+
+let ghostPt = null;
+function renderGhostLink(){
+  const a = nodeById(linkFrom);
+  if(!a || !ghostPt) return '';
+  const L = LINKS[linkMode] || LINKS.flow;
+  const p1 = anchorOn(a, ghostPt.x, ghostPt.y);
+  return '<path d="M'+p1.x+' '+p1.y+' L'+ghostPt.x+' '+ghostPt.y+'" fill="none" stroke="'+L.c+
+         '" stroke-width="2" stroke-dasharray="6 5" opacity=".8" marker-end="url(#ar-'+linkMode+')"/>'+
+         '<circle cx="'+ghostPt.x+'" cy="'+ghostPt.y+'" r="4" fill="'+L.c+'"/>';
+}
+
+/* ══════════════════════════════════════════════════════════════
+   8 · CREACIÓN Y MANIPULACIÓN DE ELEMENTOS
+   ══════════════════════════════════════════════════════════════ */
+function defaultName(fam,typeId){
+  const ty = typesOf(fam).filter(x=>x.id===typeId)[0];
+  return ty ? ty.n : FAMILIES[fam][LANG].name;
+}
+function addElement(fam, typeId, wx, wy, quiet){
+  const F = FAMILIES[fam];
+  const n = {
+    id: uid(fam), fam: fam, type: typeId,
+    name: defaultName(fam,typeId),
+    mission:'', notes:'', lead:'',
+    state: 'forming',
+    people: F.shape==='container' ? 0 : (fam==='crew'?5:6),
+    x: Math.round((wx==null?viewCenterWorld().x:wx) - F.w/2),
+    y: Math.round((wy==null?viewCenterWorld().y:wy) - F.h/2),
+    w: F.w, h: F.h, parent: null
+  };
+  pushHistory();
+  S.nodes.push(n);
+  reparent(n);
+  sel = n.id;
+  render(); renderInspector(); runDiagnostics();
+  if(!quiet) toast(t('toast.added'),'ok');
+  return n;
+}
+function removeElement(id){
+  pushHistory();
+  const kids = S.nodes.filter(n=>n.parent===id);
+  kids.forEach(k=>{ k.parent = null; });
+  S.nodes = S.nodes.filter(n=>n.id!==id);
+  S.links = S.links.filter(l=>l.from!==id && l.to!==id);
+  if(sel===id) sel = null;
+  render(); renderInspector(); runDiagnostics();
+  toast(t('toast.deleted'),'ok');
+}
+function duplicateElement(id){
+  const src = nodeById(id); if(!src) return;
+  pushHistory();
+  const n = clone(src);
+  n.id = uid(n.fam); n.x += 28; n.y += 28; n.parent = null;
+  S.nodes.push(n); reparent(n); sel = n.id;
+  render(); renderInspector(); runDiagnostics();
+}
+/** Determina el contenedor más pequeño que envuelve el centro del elemento. */
+function reparent(n){
+  if(isContainer(n) && n.fam==='crowd'){ n.parent = null; return; }
+  const cx = n.x+n.w/2, cy = n.y+n.h/2;
+  let best = null;
+  S.nodes.forEach(function(c){
+    if(c.id===n.id || !isContainer(c)) return;
+    if(c.parent===n.id) return;
+    if(isContainer(n) && c.w*c.h <= n.w*n.h) return;
+    if(cx>c.x && cx<c.x+c.w && cy>c.y && cy<c.y+c.h){
+      if(!best || c.w*c.h < best.w*best.h) best = c;
+    }
+  });
+  n.parent = best ? best.id : null;
+}
+function descendants(id){
+  let out = [], stack = [id];
+  while(stack.length){
+    const cur = stack.pop();
+    S.nodes.forEach(function(n){ if(n.parent===cur){ out.push(n); stack.push(n.id); } });
+  }
+  return out;
+}
+function addLink(from,to,type){
+  if(from===to){ toast(t('toast.selfLink'),'err'); return; }
+  if(S.links.some(l=>l.from===from && l.to===to && l.type===type)){ toast(t('toast.dupLink'),'err'); return; }
+  pushHistory();
+  S.links.push({id:uid('l'), from:from, to:to, type:type, label:''});
+  render(); renderInspector(); runDiagnostics();
+  toast(t('toast.linked'),'ok');
+}
+function removeLink(id){
+  pushHistory();
+  S.links = S.links.filter(l=>l.id!==id);
+  render(); renderInspector(); runDiagnostics();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   9 · INTERACCIÓN CON EL LIENZO
+   ══════════════════════════════════════════════════════════════ */
+let drag = null;
+
+/** Contenedor cuya banda de cabecera (66 px) contiene el punto dado. */
+function hitContainerHeader(wx,wy){
+  const cs = S.nodes.filter(isContainer).slice().sort((a,b)=>(a.w*a.h)-(b.w*b.h));
+  for(let i=0;i<cs.length;i++){
+    const c = cs[i];
+    if(wx>=c.x && wx<=c.x+c.w && wy>=c.y && wy<=c.y+66) return c;
+  }
+  return null;
+}
+/**
+ * Resuelve qué elemento recibe el clic. Las conexiones tienen un área de
+ * impacto ancha que, sin esta prioridad, taparía las cabeceras de las Bases
+ * y los Turfs que atraviesan.
+ */
+function pickAt(e){
+  const stack = document.elementsFromPoint(e.clientX, e.clientY) || [];
+  let plain = null, link = null, exact = null, cont = null;
+  for(let i=0;i<stack.length;i++){
+    const el = stack[i];
+    if(!el || !el.closest) continue;
+    const ng = el.closest('.node-g');
+    if(ng){
+      if(ng.classList.contains('cont-g')){ if(!cont) cont = ng; }
+      else if(!plain) plain = ng;
+    }
+    const lg = el.closest('.link-g');
+    if(lg){
+      if(!link) link = lg;
+      if(!exact && el.getAttribute && el.getAttribute('class')==='lk-precise') exact = lg;
+    }
+  }
+  if(plain) return {node:plain, link:null};
+  if(exact) return {node:null, link:exact};
+  const w = toWorld(e.clientX, e.clientY);
+  const hdr = hitContainerHeader(w.x, w.y);
+  if(hdr){
+    const el = svg.querySelector('.cont-g[data-id="'+hdr.id+'"]');
+    if(el) return {node:el, link:null};
+  }
+  if(link) return {node:null, link:link};
+  return {node:cont, link:null};
+}
+
+svg.addEventListener('pointerdown', function(e){
+  const rzEl = e.target.closest('.rz-handle');
+  const hit  = rzEl ? {node:null,link:null} : pickAt(e);
+  const nodeEl = hit.node, linkEl = hit.link;
+
+  if(rzEl){
+    const n = nodeById(rzEl.getAttribute('data-rz'));
+    const w0 = toWorld(e.clientX,e.clientY);
+    drag = {mode:'resize', n:n, ox:w0.x-n.w, oy:w0.y-n.h, moved:false};
+    try{ svg.setPointerCapture(e.pointerId); }catch(err){} e.preventDefault(); return;
+  }
+
+  if(nodeEl){
+    const id = nodeEl.getAttribute('data-id');
+    if(linkMode){
+      if(!linkFrom){ linkFrom = id; ghostPt = toWorld(e.clientX,e.clientY); render(); toast(t('toast.linkstart')); }
+      else { addLink(linkFrom,id,linkMode); linkFrom = null; ghostPt = null; render(); }
+      e.preventDefault(); return;
+    }
+    const n = nodeById(id);
+    const w0 = toWorld(e.clientX,e.clientY);
+    sel = id;
+    drag = {mode:'move', n:n, dx:w0.x-n.x, dy:w0.y-n.y, kids:descendants(id).map(k=>({n:k,dx:k.x-n.x,dy:k.y-n.y})), moved:false, snap:null};
+    render(); renderInspector();
+    try{ svg.setPointerCapture(e.pointerId); }catch(err){} e.preventDefault(); return;
+  }
+
+  if(linkEl && !linkMode){
+    sel = linkEl.getAttribute('data-link');
+    render(); renderInspector(); e.preventDefault(); return;
+  }
+
+  // fondo → pan / deseleccionar
+  if(linkMode && linkFrom){ linkFrom = null; ghostPt = null; render(); return; }
+  drag = {mode:'pan', sx:e.clientX, sy:e.clientY, vx:S.view.x, vy:S.view.y, moved:false};
+  svg.classList.add('panning');
+  try{ svg.setPointerCapture(e.pointerId); }catch(err){}
+});
+
+svg.addEventListener('pointermove', function(e){
+  if(linkMode && linkFrom && !drag){ ghostPt = toWorld(e.clientX,e.clientY); document.getElementById('l-ov').innerHTML = renderGhostLink(); return; }
+  if(!drag) return;
+  if(drag.mode==='pan'){
+    drag.moved = true;
+    S.view.x = drag.vx + (e.clientX-drag.sx);
+    S.view.y = drag.vy + (e.clientY-drag.sy);
+    applyView(); return;
+  }
+  const w = toWorld(e.clientX,e.clientY);
+  if(drag.mode==='move'){
+    if(!drag.moved){ drag.moved = true; pushHistory(); }
+    let nx = w.x-drag.dx, ny = w.y-drag.dy;
+    if(!e.altKey){ nx = Math.round(nx/8)*8; ny = Math.round(ny/8)*8; }
+    drag.n.x = nx; drag.n.y = ny;
+    drag.kids.forEach(function(k){ k.n.x = nx+k.dx; k.n.y = ny+k.dy; });
+    fastMove(drag.n); drag.kids.forEach(k=>fastMove(k.n));
+    renderLinks();
+  } else if(drag.mode==='resize'){
+    if(!drag.moved){ drag.moved = true; pushHistory(); }
+    drag.n.w = Math.max(240, Math.round((w.x-drag.ox)/8)*8);
+    drag.n.h = Math.max(150, Math.round((w.y-drag.oy)/8)*8);
+    render();
+  }
+});
+
+function fastMove(n){
+  const g = svg.querySelector('.node-g[data-id="'+n.id+'"]');
+  if(g) g.setAttribute('transform','translate('+n.x+','+n.y+')');
+}
+
+function endDrag(e){
+  if(!drag){ svg.classList.remove('panning'); return; }
+  const d = drag; drag = null; svg.classList.remove('panning');
+  try{ svg.releasePointerCapture(e.pointerId); }catch(err){}
+  if(d.mode==='pan'){
+    if(!d.moved){ sel = null; render(); renderInspector(); }
+    return;
+  }
+  if(d.moved){
+    if(d.mode==='move'){
+      reparent(d.n);
+      d.kids.forEach(function(k){ reparent(k.n); });
+    }
+    render(); renderInspector(); runDiagnostics();
+  }
+}
+svg.addEventListener('pointerup', endDrag);
+svg.addEventListener('pointercancel', endDrag);
+
+svg.addEventListener('wheel', function(e){
+  e.preventDefault();
+  const r = svg.getBoundingClientRect();
+  const mx = e.clientX-r.left, my = e.clientY-r.top;
+  const factor = e.ctrlKey ? 0.009 : 0.0015;
+  const k2 = clamp(S.view.k * Math.exp(-e.deltaY*factor), .18, 3);
+  S.view.x = mx - (mx-S.view.x)*(k2/S.view.k);
+  S.view.y = my - (my-S.view.y)*(k2/S.view.k);
+  S.view.k = k2;
+  applyView();
+},{passive:false});
+
+function zoomBy(f){
+  const r = svg.getBoundingClientRect();
+  const mx = r.width/2, my = r.height/2;
+  const k2 = clamp(S.view.k*f,.18,3);
+  S.view.x = mx-(mx-S.view.x)*(k2/S.view.k);
+  S.view.y = my-(my-S.view.y)*(k2/S.view.k);
+  S.view.k = k2; applyView();
+}
+function contentBounds(){
+  if(!S.nodes.length) return null;
+  let x1=Infinity,y1=Infinity,x2=-Infinity,y2=-Infinity;
+  S.nodes.forEach(function(n){
+    x1=Math.min(x1,n.x); y1=Math.min(y1,n.y);
+    x2=Math.max(x2,n.x+n.w); y2=Math.max(y2,n.y+n.h);
+  });
+  return {x1:x1,y1:y1,x2:x2,y2:y2,w:x2-x1,h:y2-y1};
+}
+function fitView(){
+  const b = contentBounds(); if(!b) return;
+  const r = svg.getBoundingClientRect();
+  const wide = window.innerWidth > 900;
+  const legendOpen = wide && !document.getElementById('legend').classList.contains('collapsed');
+  const padL = legendOpen ? 200 : 34, padR = 34, padT = wide ? 62 : 24, padB = 108;
+  const availW = Math.max(160, r.width-padL-padR), availH = Math.max(160, r.height-padT-padB);
+  const k = clamp(Math.min(availW/b.w, availH/b.h), .18, 1.35);
+  S.view.k = k;
+  S.view.x = padL + availW/2 - (b.x1+b.w/2)*k;
+  S.view.y = padT + availH/2 - (b.y1+b.h/2)*k;
+  applyView();
+}
+function focusNode(id){
+  const n = nodeById(id); if(!n) return;
+  const r = svg.getBoundingClientRect();
+  S.view.x = r.width/2 - (n.x+n.w/2)*S.view.k;
+  S.view.y = r.height/2 - (n.y+n.h/2)*S.view.k;
+  applyView();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   10 · PALETA LATERAL
+   ══════════════════════════════════════════════════════════════ */
+const collapsed = Object.create(null);
+
+function buildPalette(){
+  const q = ($('#palette-search').value||'').trim().toLowerCase();
+  let html = '';
+  GROUPS.forEach(function(G){
+    let items = '';
+    G.fam.forEach(function(fam){
+      typesOf(fam).forEach(function(ty){
+        const hay = (ty.n+' '+ty[LANG]+' '+FAMILIES[fam][LANG].name).toLowerCase();
+        if(q && hay.indexOf(q) === -1) return;
+        const sub = FAMILIES[fam][LANG].name + ' · ' + FAMILIES[fam][LANG].tag;
+        items +=
+          '<button class="pitem" data-fam="'+fam+'" data-type="'+ty.id+'" title="'+esc(ty[LANG])+'">'+
+            '<span class="pitem-ic" style="color:'+ty.c+'">'+ico(ty.i,' style="color:'+ty.c+'"')+'</span>'+
+            '<span class="pitem-tx"><b>'+esc(ty.n)+'</b><span>'+esc(sub)+'</span></span>'+
+            '<svg class="pitem-add" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'+
+          '</button>';
+      });
+    });
+    if(!items) return;
+    const isColl = q ? false : !!collapsed[G.id];
+    html +=
+      '<section class="pgroup'+(isColl?' collapsed':'')+'" data-group="'+G.id+'">'+
+        '<button class="pgroup-head"><span class="dot" style="background:'+G.color+';color:'+G.color+'"></span>'+esc(G[LANG].t)+
+          '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>'+
+        '<div class="pgroup-body"><p class="pgroup-note">'+esc(G[LANG].s)+'</p>'+items+'</div>'+
+      '</section>';
+  });
+  $('#palette').innerHTML = html || '<div class="empty"><p>'+esc(LANG==='es'?'Sin resultados.':'No results.')+'</p></div>';
+}
+
+$('#palette').addEventListener('click', function(e){
+  const head = e.target.closest('.pgroup-head');
+  if(head){
+    const g = head.closest('.pgroup');
+    const id = g.getAttribute('data-group');
+    collapsed[id] = !collapsed[id];
+    g.classList.toggle('collapsed');
+    return;
+  }
+});
+$('#palette-search').addEventListener('input', buildPalette);
+
+/* Arrastrar desde la paleta al lienzo (pointer-based, funciona en táctil) */
+let palDrag = null;
+$('#palette').addEventListener('pointerdown', function(e){
+  const it = e.target.closest('.pitem'); if(!it) return;
+  palDrag = {fam:it.getAttribute('data-fam'), type:it.getAttribute('data-type'),
+             sx:e.clientX, sy:e.clientY, moved:false, ghost:null};
+});
+window.addEventListener('pointermove', function(e){
+  if(!palDrag) return;
+  const dist = Math.hypot(e.clientX-palDrag.sx, e.clientY-palDrag.sy);
+  if(!palDrag.moved && dist > 7){
+    palDrag.moved = true;
+    const ty = typesOf(palDrag.fam).filter(x=>x.id===palDrag.type)[0];
+    const g = document.createElement('div');
+    g.style.cssText = 'position:fixed;z-index:400;pointer-events:none;display:flex;align-items:center;gap:9px;'+
+      'padding:9px 13px;border-radius:12px;background:rgba(22,22,42,.95);border:1px solid '+hexA(ty.c,.55)+
+      ';box-shadow:0 16px 40px -10px rgba(0,0,0,.8);font-size:12.5px;font-weight:600;color:#fff;transform:translate(-50%,-50%)';
+    g.innerHTML = '<span style="width:20px;height:20px;color:'+ty.c+';display:grid;place-items:center">'+ico(ty.i)+'</span>'+esc(ty.n);
+    document.body.appendChild(g);
+    palDrag.ghost = g;
+    $('#stage').classList.add('drop-armed');
+  }
+  if(palDrag.ghost){ palDrag.ghost.style.left = e.clientX+'px'; palDrag.ghost.style.top = e.clientY+'px'; }
+});
+window.addEventListener('pointerup', function(e){
+  if(!palDrag) return;
+  const d = palDrag; palDrag = null;
+  if(d.ghost){ d.ghost.remove(); $('#stage').classList.remove('drop-armed'); }
+  const r = svg.getBoundingClientRect();
+  const inside = e.clientX>=r.left && e.clientX<=r.right && e.clientY>=r.top && e.clientY<=r.bottom;
+  if(d.moved && inside){
+    const w = toWorld(e.clientX,e.clientY);
+    addElement(d.fam,d.type,w.x,w.y);
+  } else if(!d.moved){
+    addElement(d.fam,d.type);
+    if(window.innerWidth<=900) setTab('canvas');
+  }
+});
+
+/* ══════════════════════════════════════════════════════════════
+   11 · PANEL DE DATOS (INSPECTOR)
+   ══════════════════════════════════════════════════════════════ */
+function renderInspector(){
+  const host = $('#insp-content');
+  const link = S.links.filter(l=>l.id===sel)[0];
+  const n = nodeById(sel);
+
+  if(!n && !link){
+    host.innerHTML =
+      '<div class="empty" style="padding-top:70px">'+
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>'+
+        '<p><b>'+esc(t('insp.empty.t'))+'</b>'+esc(t('insp.empty.d'))+'</p></div>';
+    return;
+  }
+
+  if(link){
+    const L = LINKS[link.type];
+    const a = nodeById(link.from), b = nodeById(link.to);
+    let opts = '';
+    Object.keys(LINKS).forEach(function(k){
+      opts += '<button data-linktype="'+k+'" class="'+(k===link.type?'on':'')+'" style="color:'+LINKS[k].c+'"><span class="bead"></span>'+esc(LINKS[k][LANG].n)+'</button>';
+    });
+    host.innerHTML =
+      '<div class="insp-hero"><div class="insp-hero-top">'+
+        '<div class="insp-ic" style="color:'+L.c+'">'+ico('assembly',' style="color:'+L.c+'"')+'</div>'+
+        '<div style="min-width:0"><h3>'+esc(L[LANG].n)+'</h3>'+
+        '<div class="fam" style="color:'+hexA(L.c,.85)+'">'+esc(a?(a.name||labelOf(a)):'?')+' → '+esc(b?(b.name||labelOf(b)):'?')+'</div></div></div>'+
+        '<p class="insp-desc">'+esc(L[LANG].d)+'</p></div>'+
+      '<div class="panel-scroll" style="padding-top:16px">'+
+        '<div class="field"><label>'+esc(t('insp.type'))+'</label><div class="seg" style="grid-template-columns:repeat(3,1fr)">'+opts+'</div></div>'+
+        '<div class="field"><label>'+esc(LANG==='es'?'Etiqueta':'Label')+'</label>'+
+          '<input type="text" data-f="label" value="'+esc(link.label||'')+'" placeholder="'+esc(LANG==='es'?'p. ej. pedidos':'e.g. orders')+'"></div>'+
+      '</div>'+
+      '<div class="insp-foot"><button class="btn" id="ib-swap">'+esc(LANG==='es'?'Invertir':'Reverse')+'</button>'+
+        '<button class="btn danger" id="ib-del">'+esc(t('insp.delete'))+'</button></div>';
+    return;
+  }
+
+  const F = famOf(n), col = colorOf(n), ty = typeOf(n), subs = typesOf(n.fam);
+  let typeOpts = '';
+  subs.forEach(function(s){ typeOpts += '<option value="'+s.id+'"'+(s.id===n.type?' selected':'')+'>'+esc(s.n)+'</option>'; });
+  let stateBtns = '';
+  STATE_ORDER.forEach(function(k){
+    stateBtns += '<button data-state="'+k+'" class="'+(k===n.state?'on':'')+'" style="color:'+STATES[k].c+'"><span class="bead"></span>'+esc(STATES[k][LANG].n)+'</button>';
+  });
+  const parent = n.parent ? nodeById(n.parent) : null;
+  const myLinks = S.links.filter(l=>l.from===n.id||l.to===n.id);
+  let linkRows = '';
+  myLinks.forEach(function(l){
+    const other = nodeById(l.from===n.id ? l.to : l.from);
+    const dir = l.from===n.id ? '→' : '←';
+    linkRows += '<div class="link-row"><span class="bar" style="background:'+LINKS[l.type].c+'"></span>'+
+      '<span class="tx"><b>'+dir+' '+esc(other?(other.name||labelOf(other)):'?')+'</b><span>'+esc(LINKS[l.type][LANG].n)+(l.label?' · '+esc(l.label):'')+'</span></span>'+
+      '<button data-gotolink="'+l.id+'" title="'+esc(LANG==='es'?'Editar':'Edit')+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>'+
+      '<button data-dellink="'+l.id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>';
+  });
+  const sizeWarn = n.fam==='crew' && n.people>0 && (n.people<3 || n.people>7);
+
+  host.innerHTML =
+    '<div class="insp-hero"><div class="insp-hero-top">'+
+      '<div class="insp-ic" style="color:'+col+'">'+ico(iconOf(n),' style="color:'+col+'"')+'</div>'+
+      '<div style="min-width:0"><h3>'+esc(n.name||labelOf(n))+'</h3>'+
+      '<div class="fam" style="color:'+hexA(col,.9)+'">'+esc(F[LANG].name)+' · '+esc(F[LANG].tag)+'</div></div></div>'+
+      '<p class="insp-desc">'+esc(descOf(n))+' <a href="'+(ty?ty.u:F.url)+'" target="_blank" rel="noopener">'+esc(t('insp.learn'))+' ↗</a></p></div>'+
+
+    '<div class="panel-scroll" style="padding-top:16px">'+
+      '<div class="field"><label>'+esc(t('insp.name'))+'</label>'+
+        '<input type="text" data-f="name" value="'+esc(n.name)+'" placeholder="'+esc(t('ph.name'))+'"></div>'+
+
+      (subs.length>1 ? '<div class="field"><label>'+esc(t('insp.type'))+'</label><select data-f="type">'+typeOpts+'</select>'+
+        '<p class="hint">'+esc(descOf(n))+'</p></div>' : '')+
+
+      '<div class="field"><label>'+esc(t('insp.mission'))+'</label>'+
+        '<textarea data-f="mission" placeholder="'+esc(t('ph.mission'))+'">'+esc(n.mission)+'</textarea></div>'+
+
+      '<div class="divider"></div>'+
+
+      '<div class="field"><label>'+esc(t('insp.state'))+'</label>'+
+        '<div class="seg c4">'+stateBtns+'</div>'+
+        '<p class="hint">'+esc(STATES[n.state][LANG].d)+'</p></div>'+
+
+      '<div class="field"><label>'+esc(t('insp.people'))+'</label>'+
+        '<div class="stepper"><button data-people="-1">–</button>'+
+        '<span class="val'+(sizeWarn?' warn':'')+'">'+n.people+'</span>'+
+        '<button data-people="1">+</button></div>'+
+        (sizeWarn ? '<p class="hint" style="color:var(--state-turmoil)">'+esc(t('warn.crewsize'))+'</p>' : '')+'</div>'+
+
+      '<div class="field"><label>'+esc(t('insp.lead'))+'</label>'+
+        '<input type="text" data-f="lead" value="'+esc(n.lead)+'" placeholder="'+esc(t('ph.lead'))+'"></div>'+
+
+      '<div class="field"><label>'+esc(t('insp.parent'))+'</label>'+
+        '<div style="font-size:12.5px;padding:9px 11px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--glass-brd);color:'+
+        (parent?'var(--tx-1)':'var(--tx-3)')+'">'+
+        (parent? '<span style="color:'+colorOf(parent)+'">●</span> '+esc(parent.name||labelOf(parent)) : esc(t('insp.parent.none')))+'</div></div>'+
+
+      '<div class="field"><label>'+esc(t('insp.notes'))+'</label>'+
+        '<textarea data-f="notes" placeholder="'+esc(t('ph.notes'))+'">'+esc(n.notes)+'</textarea></div>'+
+
+      '<div class="divider"></div>'+
+      '<p class="sec-label">'+esc(t('insp.links'))+' ('+myLinks.length+')</p>'+
+      (linkRows || '<p class="hint" style="font-size:11.5px;color:var(--tx-3);line-height:1.55">'+esc(t('insp.nolinks'))+'</p>')+
+    '</div>'+
+
+    '<div class="insp-foot">'+
+      '<button class="btn" id="ib-focus">'+esc(t('insp.focus'))+'</button>'+
+      '<button class="btn" id="ib-dup">'+esc(t('insp.duplicate'))+'</button>'+
+      '<button class="btn danger" id="ib-del">'+esc(t('insp.delete'))+'</button>'+
+    '</div>';
+}
+
+$('#inspector').addEventListener('input', function(e){
+  const f = e.target.getAttribute('data-f'); if(!f) return;
+  const link = S.links.filter(l=>l.id===sel)[0];
+  const n = nodeById(sel);
+  if(link && f==='label'){ link.label = e.target.value; renderLinks(); saveLocal(); return; }
+  if(!n) return;
+  if(f==='type'){
+    pushHistory(); n.type = e.target.value;
+    if(!n.nameEdited) n.name = defaultName(n.fam,n.type);
+    render(); renderInspector(); runDiagnostics(); return;
+  }
+  n[f] = e.target.value;
+  if(f==='name') n.nameEdited = true;
+  render();
+  if(f==='name'){
+    const h = $('#insp-content .insp-hero h3'); if(h) h.textContent = n.name || labelOf(n);
+  }
+  runDiagnostics();
+});
+
+$('#inspector').addEventListener('click', function(e){
+  const n = nodeById(sel);
+  const st = e.target.closest('[data-state]');
+  if(st && n){ pushHistory(); n.state = st.getAttribute('data-state'); render(); renderInspector(); runDiagnostics(); return; }
+  const pp = e.target.closest('[data-people]');
+  if(pp && n){ n.people = clamp(n.people + (+pp.getAttribute('data-people')), 0, 999); render(); renderInspector(); runDiagnostics(); return; }
+  const lt = e.target.closest('[data-linktype]');
+  if(lt){ const l = S.links.filter(x=>x.id===sel)[0]; if(l){ pushHistory(); l.type = lt.getAttribute('data-linktype'); render(); renderInspector(); } return; }
+  const dl = e.target.closest('[data-dellink]');
+  if(dl){ removeLink(dl.getAttribute('data-dellink')); return; }
+  const gl = e.target.closest('[data-gotolink]');
+  if(gl){ sel = gl.getAttribute('data-gotolink'); render(); renderInspector(); return; }
+  if(e.target.closest('#ib-del')){
+    if(nodeById(sel)) removeElement(sel); else if(sel) removeLink(sel);
+    return;
+  }
+  if(e.target.closest('#ib-dup') && n){ duplicateElement(n.id); return; }
+  if(e.target.closest('#ib-focus') && n){ focusNode(n.id); return; }
+  if(e.target.closest('#ib-swap')){
+    const l = S.links.filter(x=>x.id===sel)[0];
+    if(l){ pushHistory(); const f = l.from; l.from = l.to; l.to = f; render(); renderInspector(); }
+    return;
+  }
+});
+
+/* ══════════════════════════════════════════════════════════════
+   12 · DIAGNÓSTICO DE REGLAS unFIX
+   ══════════════════════════════════════════════════════════════ */
+function diagnostics(){
+  const out = [];
+  const crews = S.nodes.filter(n=>n.fam==='crew');
+  const bases = S.nodes.filter(n=>n.fam==='base');
+  const forums = S.nodes.filter(n=>n.fam==='forum');
+  const T = (es,en) => LANG==='es'?es:en;
+
+  const bad = crews.filter(c=>c.people>0 && (c.people<3||c.people>7));
+  if(bad.length) out.push({lvl:'warn', t:T('Tamaño de Crew fuera de rango','Crew size out of range'),
+    d:T('unFIX recomienda de 3 a 7 personas por Crew: ','unFIX recommends three to seven people per Crew: ')+bad.map(c=>(c.name||labelOf(c))+' ('+c.people+')').join(', ')+'.'});
+
+  const orphan = crews.concat(forums).filter(n=>!n.parent);
+  if(orphan.length) out.push({lvl:'warn', t:T('Elementos sin Base','Elements with no Base'),
+    d:T('Todo Crew opera desde una Base y toda persona tiene una Base como hogar. Sin contenedor: ','Every Crew operates from a Base and every person has a Base as their home. Without a container: ')+orphan.map(n=>n.name||labelOf(n)).join(', ')+'.'});
+
+  bases.forEach(function(b){
+    const inside = S.nodes.filter(n=>n.parent===b.id || (n.parent && (nodeById(n.parent)||{}).parent===b.id));
+    const cs = inside.filter(n=>n.fam==='crew');
+    if(!cs.length){
+      out.push({lvl:'warn', t:T('Base sin Crews','Base with no Crews'), d:'“'+(b.name||labelOf(b))+'” '+T('no contiene ningún Crew.','contains no Crew.')});
+      return;
+    }
+    if(!cs.some(c=>c.type==='governance'))
+      out.push({lvl:'warn', t:T('Base sin Governance Crew','Base without a Governance Crew'),
+        d:'“'+(b.name||labelOf(b))+'”: '+T('las únicas posiciones de gestión de una Base están en su Governance Crew.','the only management positions in a Base sit in its Governance Crew.')});
+    const vs = cs.filter(c=>c.type==='value-stream').length;
+    if(vs*2 < cs.length)
+      out.push({lvl:'warn', t:T('Pocos Value Stream Crews','Few Value Stream Crews'),
+        d:'“'+(b.name||labelOf(b))+'”: '+vs+'/'+cs.length+'. '+T('En un negocio normal, la mayoría de los Crews deberían ser Value Stream Crews.','In a regular business, most Crews should be Value Stream Crews.')});
+    const ppl = cs.reduce((a,c)=>a+(c.people||0),0);
+    if(ppl > 150)
+      out.push({lvl:'warn', t:T('Base demasiado grande','Base too large'),
+        d:'“'+(b.name||labelOf(b))+'”: '+ppl+' '+T('personas. El tamaño de una Base va de un solo equipo a unos pocos cientos; por encima de ~150 se pierde el sentido de pertenencia.','people. A Base ranges from a single team to a few hundred; above ~150 the sense of belonging erodes.')});
+  });
+
+  const leagues = S.nodes.filter(n=>n.fam==='league');
+  leagues.forEach(function(lg){
+    const inside = S.nodes.filter(n=>n.parent===lg.id);
+    if(inside.length && !inside.some(n=>n.fam==='cluster' && n.type==='governance'))
+      out.push({lvl:'warn', t:T('League sin Governance Cluster','League without a Governance Cluster'),
+        d:'“'+(lg.name||labelOf(lg))+'”: '+T('la League tiene su propio equipo de gestión.','the League has its own management team.')});
+  });
+
+  const turmoil = S.nodes.filter(n=>n.state==='turmoil');
+  if(turmoil.length) out.push({lvl:'err', t:T('Elementos en Turmoil','Elements in Turmoil'),
+    d:turmoil.map(n=>n.name||labelOf(n)).join(', ')+'. '+T('Necesitan atención antes de añadir más estructura.','They need attention before adding more structure.')});
+
+  const noMission = S.nodes.filter(n=>!String(n.mission||'').trim());
+  if(noMission.length) out.push({lvl:'warn', t:T('Sin misión definida','No mission defined'),
+    d:noMission.length+' '+T('elemento(s) sin misión. Un Crew es "un equipo pequeño con una misión y un objetivo definido".','element(s) have no mission. A Crew is "a small team on a mission with a defined goal".')});
+
+  const isolated = S.nodes.filter(n=>!isContainer(n) && !S.links.some(l=>l.from===n.id||l.to===n.id));
+  if(isolated.length && S.links.length) out.push({lvl:'warn', t:T('Elementos sin conexiones','Unconnected elements'),
+    d:isolated.map(n=>n.name||labelOf(n)).join(', ')+'. '+T('Los Forums son el tejido conectivo entre Crews.','Forums are the connective tissue between Crews.')});
+
+  return out;
+}
+function runDiagnostics(){
+  const d = diagnostics();
+  const b = $('#diag-badge');
+  if(d.length){ b.style.display=''; b.textContent = d.length; } else { b.style.display='none'; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   13 · MODAL, TOAST Y EXPORTACIÓN
+   ══════════════════════════════════════════════════════════════ */
+function openModal(title, bodyHtml, footHtml){
+  $('#modal').innerHTML =
+    '<div class="modal-head"><h3>'+esc(title)+'</h3>'+
+      '<button class="btn icon" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>'+
+    '<div class="modal-body">'+bodyHtml+'</div>'+
+    '<div class="modal-foot">'+(footHtml||'<button class="btn" data-close>'+esc(t('diag.close'))+'</button>')+'</div>';
+  $('#modal-bg').classList.add('open');
+}
+function closeModal(){ $('#modal-bg').classList.remove('open'); }
+$('#modal-bg').addEventListener('click', function(e){
+  if(e.target.id==='modal-bg' || e.target.closest('[data-close]')) closeModal();
+});
+
+function toast(msg, kind){
+  const el = document.createElement('div');
+  el.className = 'toast '+(kind||'');
+  const icons = {
+    ok:'<path d="M20 6L9 17l-5-5"/>',
+    err:'<circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/>'
+  };
+  el.innerHTML = (kind?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">'+icons[kind]+'</svg>':'')+esc(msg);
+  $('#toast-wrap').appendChild(el);
+  setTimeout(function(){ el.style.transition='opacity .3s,transform .3s'; el.style.opacity='0'; el.style.transform='translateY(8px)'; }, 2100);
+  setTimeout(function(){ el.remove(); }, 2450);
+}
+
+function download(name, blob){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  toast(t('toast.exported'),'ok');
+}
+const slug = s => String(s||'unfix').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'unfix';
+
+function exportJSON(){
+  const data = {
+    format:'unfix-organization-design', version:1,
+    title:S.title, exported:new Date().toISOString(),
+    model:{ source:'https://unfix.com', patterns:'Structural Patterns · Crew / Base / Forum / Turf / Scaling' },
+    nodes:S.nodes.map(function(n){
+      const ty = typeOf(n);
+      return {id:n.id, family:n.fam, type:n.type, typeName:ty?ty.n:null, name:n.name, mission:n.mission,
+              maturity:n.state, people:n.people, lead:n.lead, notes:n.notes, parent:n.parent,
+              geometry:{x:n.x,y:n.y,w:n.w,h:n.h}};
+    }),
+    links:S.links.map(l=>({id:l.id, from:l.from, to:l.to, type:l.type, typeName:LINKS[l.type].en.n, label:l.label}))
+  };
+  download(slug(S.title)+'.json', new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+}
+
+const SVG_STYLE =
+ '.node-title{font-size:13.5px;font-weight:600;letter-spacing:-.015em;fill:#fff}'+
+ '.node-kind{font-size:9px;font-weight:700;letter-spacing:.13em}'+
+ '.node-mission{font-size:10.5px;fill:rgba(255,255,255,.6)}'+
+ '.node-meta{font-size:9.5px;font-weight:600;letter-spacing:.04em}'+
+ '.cont-title{font-size:16px;font-weight:700;letter-spacing:-.02em;fill:#fff}'+
+ '.cont-kind{font-size:9px;font-weight:700;letter-spacing:.16em}'+
+ '.cont-sub{font-size:10.5px;font-weight:500}'+
+ '.link-lbl{font-size:9px;font-weight:700;letter-spacing:.09em}'+
+ 'text{font-family:'+FONT+'}';
+
+function buildStandaloneSVG(){
+  const b = contentBounds(); if(!b) return null;
+  const pad = 64, W = Math.round(b.w+pad*2), H = Math.round(b.h+pad*2+46);
+  const cl = svg.cloneNode(true);
+  cl.setAttribute('xmlns','http://www.w3.org/2000/svg');
+  cl.setAttribute('xmlns:xlink','http://www.w3.org/1999/xlink');
+  cl.setAttribute('width',W); cl.setAttribute('height',H);
+  cl.setAttribute('viewBox','0 0 '+W+' '+H);
+  cl.removeAttribute('id'); cl.removeAttribute('class'); cl.removeAttribute('style');
+  const ov = cl.querySelector('#l-ov'); if(ov) ov.innerHTML='';
+  Array.prototype.forEach.call(cl.querySelectorAll('.rz-handle'), el=>el.remove());
+  Array.prototype.forEach.call(cl.querySelectorAll('.enter'), el=>el.classList.remove('enter'));
+  Array.prototype.forEach.call(cl.querySelectorAll('.link-flow-anim'), el=>el.classList.remove('link-flow-anim'));
+  const vp = cl.querySelector('#vp');
+  vp.setAttribute('transform','translate('+(pad-b.x1)+','+(pad-b.y1)+')');
+
+  const st = document.createElementNS('http://www.w3.org/2000/svg','style');
+  st.textContent = SVG_STYLE;
+  cl.insertBefore(st, cl.firstChild);
+  const bg = document.createElementNS('http://www.w3.org/2000/svg','rect');
+  bg.setAttribute('width',W); bg.setAttribute('height',H); bg.setAttribute('fill','#0b0b14');
+  cl.insertBefore(bg, st.nextSibling);
+
+  const cap = document.createElementNS('http://www.w3.org/2000/svg','text');
+  cap.setAttribute('x',pad); cap.setAttribute('y',H-22);
+  cap.setAttribute('fill','rgba(255,255,255,.34)');
+  cap.setAttribute('style','font-family:'+FONT+';font-size:12px;font-weight:500');
+  cap.textContent = S.title + '  ·  unFIX Organization Design  ·  unfix.com';
+  cl.appendChild(cap);
+  return {markup:new XMLSerializer().serializeToString(cl), w:W, h:H};
+}
+function exportSVG(){
+  const r = buildStandaloneSVG();
+  if(!r){ toast(t('toast.nothing'),'err'); return; }
+  download(slug(S.title)+'.svg', new Blob([r.markup],{type:'image/svg+xml;charset=utf-8'}));
+}
+function exportPNG(){
+  const r = buildStandaloneSVG();
+  if(!r){ toast(t('toast.nothing'),'err'); return; }
+  const scale = 2;
+  const img = new Image();
+  img.onload = function(){
+    const cv = document.createElement('canvas');
+    cv.width = r.w*scale; cv.height = r.h*scale;
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = '#0b0b14'; ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.drawImage(img,0,0,cv.width,cv.height);
+    cv.toBlob(function(bl){ download(slug(S.title)+'.png', bl); },'image/png');
+  };
+  img.onerror = function(){ toast(LANG==='es'?'No se pudo generar el PNG':'Could not generate PNG','err'); };
+  img.src = 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(r.markup);
+}
+
+function openExport(){
+  if(!S.nodes.length){ toast(t('toast.nothing'),'err'); return; }
+  const card = (id,ic,tt,dd) =>
+    '<button class="pitem" data-export="'+id+'" style="width:100%;margin-bottom:8px;padding:13px">'+
+      '<span class="pitem-ic" style="color:var(--accent)">'+ico(ic,' style="color:var(--accent)"')+'</span>'+
+      '<span class="pitem-tx"><b style="font-size:13.5px">'+esc(tt)+'</b><span style="white-space:normal">'+esc(dd)+'</span></span></button>';
+  openModal(t('exp.title'),
+    card('json','platform',t('exp.json'),t('exp.jsond'))+
+    card('png','experience',t('exp.png'),t('exp.pngd'))+
+    card('svg','capability',t('exp.svg'),t('exp.svgd')));
+}
+$('#modal').addEventListener('click', function(e){
+  if(e.target.closest('#help-tour')){ closeModal(); setTimeout(tourStart, 120); return; }
+  const b = e.target.closest('[data-export]');
+  if(!b) return;
+  const k = b.getAttribute('data-export');
+  closeModal();
+  setTimeout(function(){ if(k==='json') exportJSON(); else if(k==='png') exportPNG(); else exportSVG(); }, 80);
+});
+
+function openDiagnostics(){
+  const d = diagnostics();
+  const icons = {ok:'<path d="M20 6L9 17l-5-5"/>', warn:'<path d="M10.3 3.6L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>', err:'<circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/>'};
+  const body = d.length
+    ? d.map(x=>'<div class="diag '+x.lvl+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+icons[x.lvl]+'</svg><div><b>'+esc(x.t)+'</b>'+esc(x.d)+'</div></div>').join('')
+    : '<div class="diag ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">'+icons.ok+'</svg><div><b>'+esc(LANG==='es'?'Todo en orden':'All good')+'</b>'+esc(t('diag.none'))+'</div></div>';
+  const stats = '<h4>'+esc(LANG==='es'?'Resumen':'Summary')+'</h4><ul>'+
+    ['base','turf','crew','forum','league','cluster','assembly','crowd','coalition','congress'].map(function(f){
+      const c = S.nodes.filter(n=>n.fam===f).length;
+      return c ? '<li><code>'+c+'</code> '+esc(FAMILIES[f][LANG].name)+(c>1?'s':'')+'</li>' : '';
+    }).join('')+
+    (S.links.length?'<li><code>'+S.links.length+'</code> '+esc(LANG==='es'?'conexiones':'connections')+'</li>':'')+
+    '<li><code>'+S.nodes.reduce((a,n)=>a+(n.fam==='crew'?(n.people||0):0),0)+'</code> '+esc(LANG==='es'?'personas en Crews':'people in Crews')+'</li></ul>';
+  openModal(t('diag.title'), body + stats);
+}
+
+function openHelp(){
+  const es =
+   '<h4>Construir</h4><ul>'+
+   '<li>Haz clic en un patrón de la biblioteca para añadirlo al centro, o <b>arrástralo</b> al punto exacto del lienzo.</li>'+
+   '<li>Suelta un Crew o un Forum <b>dentro</b> de una Base o un Turf y quedará contenido en ella. Al mover el contenedor se mueve todo su contenido.</li>'+
+   '<li>Los contenedores (Base, Turf, League, Crowd) se redimensionan desde la esquina inferior derecha cuando están seleccionados.</li></ul>'+
+   '<h4>Conectar</h4><ul>'+
+   '<li>Elige un tipo de conexión en la barra inferior, haz clic en el origen y después en el destino. <code>Esc</code> cancela.</li>'+
+   '<li><b>Flujo de valor</b> (continua): el trabajo viaja de un elemento al siguiente. <b>Dependencia</b> (discontinua): el origen necesita algo del destino. <b>Alineación</b> (punteada, doble flecha): objetivos compartidos.</li></ul>'+
+   '<h4>Atajos</h4><ul>'+
+   '<li><code>Rueda</code> zoom · <code>Arrastrar fondo</code> mover lienzo · <code>Alt</code> mientras arrastras desactiva el ajuste a rejilla</li>'+
+   '<li><code>1</code> <code>2</code> <code>3</code> tipos de conexión · <code>V</code> volver a seleccionar</li>'+
+   '<li><code>Supr</code> eliminar · <code>Ctrl+Z</code> / <code>Ctrl+Shift+Z</code> deshacer y rehacer · <code>Ctrl+D</code> duplicar</li></ul>'+
+   '<h4>Sobre el modelo</h4>'+
+   '<p>unFIX no es un framework sino una <b>biblioteca de patrones</b>: nada es obligatorio y el enfoque es de abajo arriba. El modelo es fractal — los mismos patrones se repiten en Base, League y Crowd. Documentación completa en <a href="https://unfix.com" target="_blank" rel="noopener">unfix.com</a>.</p>';
+  const en =
+   '<h4>Build</h4><ul>'+
+   '<li>Click a pattern in the library to drop it in the centre, or <b>drag</b> it to an exact spot on the canvas.</li>'+
+   '<li>Drop a Crew or a Forum <b>inside</b> a Base or Turf and it becomes contained by it. Moving a container moves everything inside.</li>'+
+   '<li>Containers (Base, Turf, League, Crowd) resize from the bottom-right corner when selected.</li></ul>'+
+   '<h4>Connect</h4><ul>'+
+   '<li>Pick a connection type in the bottom bar, click the source and then the target. <code>Esc</code> cancels.</li>'+
+   '<li><b>Value flow</b> (solid): work travels from one element to the next. <b>Dependency</b> (dashed): the source needs something from the target. <b>Alignment</b> (dotted, double arrow): shared objectives.</li></ul>'+
+   '<h4>Shortcuts</h4><ul>'+
+   '<li><code>Wheel</code> zoom · <code>Drag background</code> pan · <code>Alt</code> while dragging disables grid snapping</li>'+
+   '<li><code>1</code> <code>2</code> <code>3</code> connection types · <code>V</code> back to select</li>'+
+   '<li><code>Del</code> delete · <code>Ctrl+Z</code> / <code>Ctrl+Shift+Z</code> undo and redo · <code>Ctrl+D</code> duplicate</li></ul>'+
+   '<h4>About the model</h4>'+
+   '<p>unFIX is not a framework but a <b>pattern library</b>: nothing is mandatory and the approach is bottom-up. The model is fractal — the same patterns repeat at Base, League and Crowd level. Full documentation at <a href="https://unfix.com" target="_blank" rel="noopener">unfix.com</a>.</p>';
+  openModal(t('help.title'), LANG==='es'?es:en,
+    '<button class="btn" data-close>'+esc(t('diag.close'))+'</button>'+
+    '<button class="btn primary" id="help-tour">'+esc(t('tour.open'))+'</button>');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   14 · DISEÑO DE EJEMPLO PRECARGADO
+   Una Base "Strongly Aligned" con Governance, Experience,
+   Facilitation y Platform Crews; un Turf de Product Area con
+   cuatro Value Stream Crews; y cuatro Forums de coordinación.
+   ══════════════════════════════════════════════════════════════ */
+function exampleData(lang){
+  const es = lang === 'es';
+  const N = (id,fam,type,name,mission,state,people,lead,x,y,w,h,parent) =>
+    ({id:id,fam:fam,type:type,name:name,mission:mission,notes:'',lead:lead,state:state,
+      people:people,x:x,y:y,w:w,h:h,parent:parent,nameEdited:true});
+  const nodes = [
+    N('ex_base','base','strongly-aligned',
+      es?'Base · Comercio Digital':'Base · Digital Commerce',
+      es?'Ser el destino de compra online más fácil del mercado, de la búsqueda a la entrega.'
+        :'Be the easiest online shopping destination on the market, from search to delivery.',
+      'performing',42,'Chiefs',0,0,1152,690,null),
+
+    N('ex_turf','turf','product-area',
+      es?'Área de Producto · Compra':'Product Area · Buying',
+      es?'Código, stack y dominio del proceso de compra. Propiedad colectiva, sin manager asignado.'
+        :'Codebase, stack and domain of the buying process. Collective ownership, no manager assigned.',
+      'performing',22,'',32,250,552,396,'ex_base'),
+
+    N('ex_gov','crew','governance',
+      es?'Chiefs de la Base':'Base Chiefs',
+      es?'Fijar visión, modelo de negocio y las restricciones a la auto-organización de la Base.'
+        :'Set vision, business model and the constraints on self-organization in the Base.',
+      'performing',4,'Chiefs',32,100,240,120,'ex_base'),
+
+    N('ex_exp','crew','experience',
+      es?'Viaje del Cliente':'Customer Journey',
+      es?'Optimizar la experiencia completa a través de web, app, tienda física y soporte.'
+        :'Optimize the whole experience across web, app, physical store and support.',
+      'performing',6,'Captain',304,100,240,120,'ex_base'),
+
+    N('ex_fac','crew','facilitation',
+      es?'Agile Enablement':'Agile Enablement',
+      es?'Ayudar a los demás Crews a trabajar mejor. Sin flujo de valor propio.'
+        :'Help the other Crews work better. No value stream of its own.',
+      'reforming',3,'Captain',576,100,240,120,'ex_base'),
+
+    N('ex_plat','crew','platform',
+      es?'Plataforma Core':'Core Platform',
+      es?'APIs, infraestructura y servicios compartidos para el resto de Crews de la Base.'
+        :'APIs, infrastructure and shared services for the other Crews in the Base.',
+      'performing',7,'Captain',848,100,240,120,'ex_base'),
+
+    N('ex_vs1','crew','value-stream',
+      es?'Checkout y Pagos':'Checkout & Payments',
+      es?'De la cesta al pago confirmado, sin traspasos a otros equipos.'
+        :'From basket to confirmed payment, with no hand-overs to other teams.',
+      'performing',6,'Captain',56,344,240,120,'ex_turf'),
+
+    N('ex_vs2','crew','value-stream',
+      es?'Catálogo y Búsqueda':'Catalogue & Search',
+      es?'Descubrimiento de producto: catálogo, búsqueda y recomendaciones.'
+        :'Product discovery: catalogue, search and recommendations.',
+      'forming',5,'Captain',320,344,240,120,'ex_turf'),
+
+    N('ex_vs3','crew','value-stream',
+      es?'Entrega y Postventa':'Delivery & Aftersales',
+      es?'Desde la confirmación del pedido hasta la devolución o la reseña.'
+        :'From order confirmation to return or review.',
+      'performing',6,'Captain',56,490,240,120,'ex_turf'),
+
+    N('ex_vs4','crew','value-stream',
+      es?'Cuenta y Fidelización':'Account & Loyalty',
+      es?'Registro, perfil, suscripciones y programa de puntos.'
+        :'Sign-up, profile, subscriptions and loyalty programme.',
+      'forming',5,'Captain',320,490,240,120,'ex_turf'),
+
+    N('ex_f1','forum','customer-journey',
+      es?'Forum de Viaje de Cliente':'Customer Journey Forum',
+      es?'Mantener coherente la experiencia de punta a punta entre todos los Crews.'
+        :'Keep the end-to-end experience coherent across all Crews.',
+      'performing',9,'Chair',616,344,240,120,'ex_base'),
+
+    N('ex_f2','forum','technological',
+      es?'Forum Tecnológico':'Technological Forum',
+      es?'Decidir stack, arquitectura y estándares técnicos compartidos.'
+        :'Decide on shared stack, architecture and technical standards.',
+      'performing',12,'Chair',880,344,240,120,'ex_base'),
+
+    N('ex_f3','forum','organizational',
+      es?'Forum Organizativo':'Organizational Forum',
+      es?'Estructura, reteaming y ways of working de la Base.'
+        :'Structure, reteaming and ways of working of the Base.',
+      'forming',8,'Chair',616,490,240,120,'ex_base'),
+
+    N('ex_f4','forum','product',
+      es?'Forum de Producto':'Product Forum',
+      es?'Coordinar hoja de ruta y dependencias entre flujos de valor.'
+        :'Coordinate roadmap and dependencies across value streams.',
+      'performing',7,'Chair',880,490,240,120,'ex_base')
+  ];
+  const L = (f,to,ty,lb) => ({id:uid('l'),from:f,to:to,type:ty,label:lb||''});
+  const links = [
+    L('ex_exp','ex_vs1','flow'),
+    L('ex_exp','ex_vs2','flow'),
+    L('ex_exp','ex_vs3','flow'),
+    L('ex_exp','ex_vs4','flow'),
+    L('ex_vs1','ex_plat','dependency', 'APIs'),
+    L('ex_vs2','ex_plat','dependency'),
+    L('ex_vs4','ex_plat','dependency'),
+    L('ex_gov','ex_exp','alignment', 'OKR'),
+    L('ex_f1','ex_exp','alignment'),
+    L('ex_f1','ex_vs1','alignment'),
+    L('ex_f2','ex_plat','alignment'),
+    L('ex_f2','ex_vs2','alignment'),
+    L('ex_f3','ex_gov','alignment'),
+    L('ex_f3','ex_fac','alignment'),
+    L('ex_f4','ex_vs3','alignment'),
+    L('ex_f4','ex_vs4','alignment')
+  ];
+  return {nodes:nodes, links:links,
+          title: es ? 'Comercio Digital — diseño unFIX' : 'Digital Commerce — unFIX design'};
+}
+function loadExample(quiet){
+  pushHistory();
+  const d = exampleData(LANG);
+  S.nodes = d.nodes; S.links = d.links; S.title = d.title;
+  $('#doc-name').value = S.title;
+  sel = null;
+  Object.keys(seen).forEach(k=>delete seen[k]);
+  render(); renderInspector(); runDiagnostics();
+  setTimeout(()=>fitView(), 30);
+  if(!quiet) toast(t('toast.example'),'ok');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   15 · IDIOMA
+   ══════════════════════════════════════════════════════════════ */
+function applyI18n(){
+  document.documentElement.lang = LANG;
+  $$('[data-i18n]').forEach(function(el){ el.textContent = t(el.getAttribute('data-i18n')); });
+  $$('[data-i18n-ph]').forEach(function(el){ el.placeholder = t(el.getAttribute('data-i18n-ph')); });
+  $$('[data-tip]').forEach(function(el){ el.title = t(el.getAttribute('data-tip')); });
+  $$('.lang-switch button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-lang')===LANG); });
+  buildPalette(); render(); renderInspector(); runDiagnostics();
+}
+$$('.lang-switch button').forEach(function(b){
+  b.addEventListener('click', function(){
+    LANG = b.getAttribute('data-lang');
+    applyI18n(); saveLocal();
+  });
+});
+
+/* ══════════════════════════════════════════════════════════════
+   16 · BARRA DE HERRAMIENTAS Y MODOS
+   ══════════════════════════════════════════════════════════════ */
+function setLinkMode(m){
+  linkMode = m; linkFrom = null; ghostPt = null;
+  svg.classList.toggle('linking', !!m);
+  $('#tool-select').classList.toggle('on', !m);
+  $$('#linkbar [data-link]').forEach(function(b){
+    const on = b.getAttribute('data-link')===m;
+    b.classList.toggle('on', on);
+    b.style.color = on ? LINKS[b.getAttribute('data-link')].c : '';
+  });
+  render();
+}
+$('#tool-select').addEventListener('click', ()=>setLinkMode(null));
+$$('#linkbar [data-link]').forEach(function(b){
+  b.addEventListener('click', function(){
+    const m = b.getAttribute('data-link');
+    setLinkMode(linkMode===m ? null : m);
+  });
+});
+
+$('#zoom-in').addEventListener('click', ()=>zoomBy(1.22));
+$('#zoom-out').addEventListener('click', ()=>zoomBy(1/1.22));
+$('#zoom-fit').addEventListener('click', ()=>fitView());
+$('#btn-undo').addEventListener('click', undo);
+$('#btn-redo').addEventListener('click', redo);
+$('#btn-diag').addEventListener('click', openDiagnostics);
+$('#btn-help').addEventListener('click', openHelp);
+$('#btn-export').addEventListener('click', openExport);
+$('#btn-example').addEventListener('click', ()=>loadExample());
+$('#btn-clear').addEventListener('click', function(){
+  if(!S.nodes.length) return;
+  if(!confirm(t('confirm.clear'))) return;
+  pushHistory();
+  S.nodes = []; S.links = []; sel = null;
+  render(); renderInspector(); runDiagnostics();
+  toast(t('toast.cleared'),'ok');
+});
+$('#doc-name').addEventListener('input', function(){ S.title = this.value; saveLocal(); });
+
+$('#btn-import').addEventListener('click', ()=>$('#file-input').click());
+$('#file-input').addEventListener('change', function(e){
+  const f = e.target.files && e.target.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = function(){
+    try{
+      const d = JSON.parse(rd.result);
+      if(!d || !Array.isArray(d.nodes)) throw new Error('bad');
+      pushHistory();
+      S.nodes = d.nodes.map(function(n){
+        const g = n.geometry || {};
+        const fam = n.family || n.fam;
+        const F = FAMILIES[fam]; if(!F) throw new Error('bad family');
+        return {id:n.id||uid(fam), fam:fam, type:n.type, name:n.name||'', mission:n.mission||'',
+                notes:n.notes||'', lead:n.lead||'', state:STATES[n.maturity||n.state]?(n.maturity||n.state):'forming',
+                people:+(n.people||0), x:+(g.x!=null?g.x:n.x)||0, y:+(g.y!=null?g.y:n.y)||0,
+                w:+(g.w!=null?g.w:n.w)||F.w, h:+(g.h!=null?g.h:n.h)||F.h,
+                parent:n.parent||null, nameEdited:true};
+      });
+      S.links = (d.links||[]).map(l=>({id:l.id||uid('l'),from:l.from,to:l.to,type:LINKS[l.type]?l.type:'flow',label:l.label||''}));
+      S.title = d.title || S.title;
+      $('#doc-name').value = S.title;
+      sel = null;
+      Object.keys(seen).forEach(k=>delete seen[k]);
+      render(); renderInspector(); runDiagnostics();
+      setTimeout(()=>fitView(), 30);
+      toast(t('toast.imported'),'ok');
+    }catch(err){ toast(t('toast.badfile'),'err'); }
+  };
+  rd.readAsText(f);
+  e.target.value = '';
+});
+
+/* ══════════════════════════════════════════════════════════════
+   17 · TECLADO
+   ══════════════════════════════════════════════════════════════ */
+document.addEventListener('keydown', function(e){
+  if(document.getElementById('tour').classList.contains('on')){
+    if(e.key==='Escape'){ e.preventDefault(); tourEnd(); }
+    else if(e.key==='ArrowRight'||e.key==='Enter'||e.key===' '){ e.preventDefault(); tourGo(tourIx+1); }
+    else if(e.key==='ArrowLeft'){ e.preventDefault(); tourGo(tourIx-1); }
+    return;
+  }
+  const tag = (e.target.tagName||'').toLowerCase();
+  const typing = tag==='input' || tag==='textarea' || tag==='select';
+  const mod = e.ctrlKey || e.metaKey;
+
+  if(e.key==='Escape'){
+    if($('#modal-bg').classList.contains('open')){ closeModal(); return; }
+    if(linkFrom){ linkFrom=null; ghostPt=null; render(); return; }
+    if(linkMode){ setLinkMode(null); return; }
+    if(sel){ sel=null; render(); renderInspector(); }
+    return;
+  }
+  if(mod && (e.key==='z'||e.key==='Z')){ e.preventDefault(); e.shiftKey?redo():undo(); return; }
+  if(mod && (e.key==='y'||e.key==='Y')){ e.preventDefault(); redo(); return; }
+  if(mod && (e.key==='d'||e.key==='D')){ if(sel && nodeById(sel)){ e.preventDefault(); duplicateElement(sel); } return; }
+  if(mod && (e.key==='s'||e.key==='S')){ e.preventDefault(); openExport(); return; }
+  if(typing) return;
+
+  if(e.key==='Delete' || e.key==='Backspace'){
+    if(!sel) return;
+    e.preventDefault();
+    if(nodeById(sel)) removeElement(sel); else removeLink(sel);
+    return;
+  }
+  if(e.key==='1') setLinkMode('flow');
+  else if(e.key==='2') setLinkMode('dependency');
+  else if(e.key==='3') setLinkMode('alignment');
+  else if(e.key==='v'||e.key==='V') setLinkMode(null);
+  else if(e.key==='f'||e.key==='F') fitView();
+  else if(e.key==='?') openHelp();
+});
+
+/* ══════════════════════════════════════════════════════════════
+   18 · RESPONSIVE — pestañas móviles
+   ══════════════════════════════════════════════════════════════ */
+function setTab(tab){
+  const b = $('#body');
+  b.classList.remove('m-left','m-right');
+  if(tab==='left') b.classList.add('m-left');
+  if(tab==='right') b.classList.add('m-right');
+  $$('#mobile-tabs button').forEach(x=>x.classList.toggle('on', x.getAttribute('data-tab')===tab));
+}
+$$('#mobile-tabs button').forEach(function(b){
+  b.addEventListener('click', ()=>setTab(b.getAttribute('data-tab')));
+});
+let wasWide = window.innerWidth > 900;
+window.addEventListener('resize', function(){
+  const wide = window.innerWidth > 900;
+  if(wide) $('#body').classList.remove('m-left','m-right');
+  applyView();
+  if(wide !== wasWide){ wasWide = wide; if(S.nodes.length) fitView(); }
+});
+$('#legend-toggle').addEventListener('click', function(){
+  const lg = $('#legend');
+  lg.classList.toggle('collapsed');
+  this.setAttribute('aria-expanded', String(!lg.classList.contains('collapsed')));
+});
+
+/* ══════════════════════════════════════════════════════════════
+   19 · AYUDA GUIADA PASO A PASO (tour con foco)
+   Cada paso ilumina una zona de la interfaz y, de paso, introduce
+   el concepto unFIX que hay detrás.
+   ══════════════════════════════════════════════════════════════ */
+const q1 = s => document.querySelector(s);
+const canvasTarget = id => () => q1('.node-g[data-id="'+id+'"]') || q1('#stage');
+
+function tourSelect(id){ if(nodeById(id)){ sel = id; render(); renderInspector(); } }
+function tourEnsureVisible(id){
+  if(!nodeById(id)) return;
+  const el = svg.querySelector('.node-g[data-id="'+id+'"]'); if(!el) return;
+  const r = svg.getBoundingClientRect(), b = el.getBoundingClientRect(), pad = 46;
+  if(b.left < r.left+pad || b.right > r.right-pad || b.top < r.top+pad || b.bottom > r.bottom-pad) focusNode(id);
+}
+function tourPaletteTo(groupId, open){
+  const g = q1('.pgroup[data-group="'+groupId+'"]'); if(!g) return;
+  if(open && g.classList.contains('collapsed')){ collapsed[groupId] = false; g.classList.remove('collapsed'); }
+  const sc = q1('#palette');
+  sc.scrollTop += g.getBoundingClientRect().top - sc.getBoundingClientRect().top - 6;
+}
+
+const TOUR = [
+{ id:'welcome', target:null, place:'center', ic:'league', col:'#8B5CF6',
+  es:{t:'Bienvenido al unFIX Designer',
+      b:'Vas a diseñar una organización con el modelo <b>unFIX</b> de Jurgen Appelo. No es un framework que se implanta entero: es una <b>biblioteca de patrones</b> de la que eliges solo lo que necesitas.',
+      q:'«Empieza donde estás y usa lo que necesites.» El recorrido dura un minuto. Puedes salir con <code>Esc</code> y volver desde el botón <b>Guía</b>.'},
+  en:{t:'Welcome to unFIX Designer',
+      b:'You are about to design an organization with Jurgen Appelo’s <b>unFIX</b> model. It is not a framework you roll out wholesale: it is a <b>pattern library</b> you pick from.',
+      q:'“Start where you are, and use what you need.” The tour takes a minute. Leave with <code>Esc</code> and come back from the <b>Guide</b> button.'} },
+
+{ id:'base', target:()=>q1('.cont-g[data-id="ex_base"]')||q1('#stage'), place:'auto', radius:24, tab:'canvas', ic:'base', col:'#F59E4B',
+  before:()=>{ sel=null; render(); renderInspector(); if(S.nodes.length) fitView(); },
+  es:{t:'La Base: el hogar de las personas',
+      b:'Todo empieza aquí. La <b>Base</b> es el grupo donde las personas se sienten seguras y en casa: puede ir de un solo equipo a unos pocos cientos. Dentro viven los Crews, los Forums y los Turfs.',
+      q:'La Base no tiene mandos intermedios. Toda la gestión ocurre en la Base, nunca dentro de un Crew.'},
+  en:{t:'The Base: where people belong',
+      b:'Everything starts here. The <b>Base</b> is the group where people feel safe and at home: anywhere from a single team to a few hundred people. Crews, Forums and Turfs live inside it.',
+      q:'A Base has no middle management. Management happens in the Base, never inside a Crew.'} },
+
+{ id:'crew', target:canvasTarget('ex_vs1'), place:'auto', tab:'canvas', ic:'valueStream', col:'#7C5CFF',
+  before:()=>{ tourEnsureVisible('ex_vs1'); },
+  es:{t:'Los Crews hacen el trabajo',
+      b:'Un <b>Crew</b> es un equipo pequeño con una misión y un objetivo definido. De tres a siete personas, autónomo y auto-organizado. Este es un <b>Value Stream Crew</b>: cubre el flujo completo, desde la petición del cliente hasta la entrega de valor.',
+      q:'Regla dura: no hay ningún manager dentro del Crew. Nadie del equipo decide el salario o la promoción de los demás.'},
+  en:{t:'Crews get the work done',
+      b:'A <b>Crew</b> is a small team on a mission with a defined goal. Three to seven people, autonomous and self-organizing. This one is a <b>Value Stream Crew</b>: it covers the whole flow, from customer request to delivered value.',
+      q:'Hard rule: there is no manager on the Crew. Nobody on the team decides anyone else’s wage or promotion.'} },
+
+{ id:'library', target:'#sidebar', place:'right', tab:'left', ic:'cluster', col:'#B364FA',
+  before:()=>{ tourPaletteTo('crew', true); },
+  es:{t:'La biblioteca de patrones',
+      b:'Aquí tienes los <b>37 patrones estructurales</b> de unFIX agrupados en seis familias. <b>Haz clic</b> para añadir uno al centro del lienzo o <b>arrástralo</b> al punto exacto donde lo quieras.',
+      q:'Siete tipos de Crew: Value Stream, Experience, Facilitation, Capability, Platform, Governance y Partnership. En un negocio normal, la mayoría deberían ser Value Stream.'},
+  en:{t:'The pattern library',
+      b:'Here are the <b>37 structural patterns</b> of unFIX grouped into six families. <b>Click</b> to add one at the centre of the canvas, or <b>drag</b> it exactly where you want it.',
+      q:'Seven Crew types: Value Stream, Experience, Facilitation, Capability, Platform, Governance and Partnership. In a regular business, most should be Value Stream.'} },
+
+{ id:'turf', target:()=>q1('.cont-g[data-id="ex_turf"]')||q1('#stage'), place:'auto', radius:24, tab:'canvas', ic:'turf', col:'#E3D354',
+  es:{t:'El Turf: territorio compartido',
+      b:'Un <b>Turf</b> es un área cultivada y protegida por las mismas personas: un área de producto, un código base, un edificio. Permite que la Base crezca sin que los Crews se hagan grandes.',
+      q:'Vigila dos cosas: el <b>maintenance drag</b> (mantener un territorio enorme te frena) y la <b>carga cognitiva</b>. Y nunca le pongas un manager: se convertiría en un silo.'},
+  en:{t:'The Turf: shared territory',
+      b:'A <b>Turf</b> is an area cultivated and protected by the same people: a product area, a codebase, a building. It lets the Base grow while the Crews stay small.',
+      q:'Watch two things: <b>maintenance drag</b> (a huge territory slows you down) and <b>cognitive load</b>. And never assign a manager to it — it would become a silo.'} },
+
+{ id:'forum', target:canvasTarget('ex_f1'), place:'auto', tab:'canvas', ic:'forum', col:'#06C6C6',
+  before:()=>{ tourEnsureVisible('ex_f1'); },
+  es:{t:'Los Forums son el tejido conectivo',
+      b:'Un <b>Forum</b> es un lugar para hablar y tomar decisiones importantes. Reúne a gente de distintos Crews sin crear jerarquía nueva. Hay diez tipos: producto, tecnológico, viaje de cliente, funcional, regional…',
+      q:'Si tienes una dependencia recurrente entre dos Crews, muchas veces la respuesta no es reorganizar: es abrir un Forum.'},
+  en:{t:'Forums are the connective tissue',
+      b:'A <b>Forum</b> is a place to talk and make important decisions. It gathers people from different Crews without creating new hierarchy. There are ten types: product, technological, customer journey, functional, regional…',
+      q:'When two Crews keep depending on each other, the answer is often not a reorg — it is opening a Forum.'} },
+
+{ id:'inspector', target:'#inspector', place:'left', tab:'right', ic:'capability', col:'#FF7A45',
+  before:()=>{ tourSelect('ex_vs2'); },
+  es:{t:'El panel de datos',
+      b:'Al seleccionar un elemento puedes editar su <b>nombre</b>, su <b>misión</b>, el <b>tipo de patrón</b>, cuántas <b>personas</b> lo forman y quién lidera. Cambiar el tipo recolorea el elemento y actualiza su definición.',
+      q:'Si un Crew se sale del rango de 3 a 7 personas, el contador se pone en rojo. Es un aviso, no una prohibición.'},
+  en:{t:'The data panel',
+      b:'Select an element and you can edit its <b>name</b>, its <b>mission</b>, the <b>pattern type</b>, how many <b>people</b> it has and who leads it. Changing the type recolours the element and updates its definition.',
+      q:'If a Crew falls outside the three-to-seven range the counter turns red. It is a warning, not a ban.'} },
+
+{ id:'maturity', target:()=>q1('#insp-content .seg.c4')||q1('#inspector'), place:'left', tab:'right', ic:'facilitation', col:'#34D399',
+  before:()=>{ if(sel!=='ex_vs2') tourSelect('ex_vs2'); },
+  es:{t:'Estados de madurez',
+      b:'Cada elemento vive en uno de cuatro estados: <b>Turmoil</b> (inestabilidad), <b>Forming</b> (constituyéndose), <b>Performing</b> (entregando de forma sostenida) y <b>Reforming</b> (reorganizándose). El borde, las barras y el icono cambian en el lienzo.',
+      q:'Reforming es <b>dynamic reteaming</b>. Si el cambio ocurre dentro del mismo Turf apenas hay coste; cruzar territorios sí cuesta velocidad.'},
+  en:{t:'Maturity states',
+      b:'Every element sits in one of four states: <b>Turmoil</b> (instability), <b>Forming</b> (coming together), <b>Performing</b> (delivering sustainably) and <b>Reforming</b> (reorganizing). The border, bars and icon change on the canvas.',
+      q:'Reforming is <b>dynamic reteaming</b>. Inside the same Turf it costs almost nothing; crossing territories does cost velocity.'} },
+
+{ id:'links', target:'#linkbar', place:'top', tab:'canvas', ic:'assembly', col:'#22D3EE',
+  before:()=>{ sel=null; render(); renderInspector(); },
+  es:{t:'Conectar elementos',
+      b:'Elige un tipo de conexión, haz clic en el <b>origen</b> y luego en el <b>destino</b>. <code>Esc</code> cancela.<br><b>Flujo de valor</b>: el trabajo viaja. <b>Dependencia</b>: el origen necesita algo del destino. <b>Alineación</b>: objetivos compartidos.',
+      q:'Las dependencias son el enemigo declarado de unFIX. Dibújalas todas: verlas es el primer paso para romperlas.'},
+  en:{t:'Connecting elements',
+      b:'Pick a connection type, click the <b>source</b> and then the <b>target</b>. <code>Esc</code> cancels.<br><b>Value flow</b>: work travels. <b>Dependency</b>: the source needs something from the target. <b>Alignment</b>: shared objectives.',
+      q:'Dependencies are unFIX’s declared enemy. Draw them all — seeing them is the first step to breaking them.'} },
+
+{ id:'diagnostics', target:'#btn-diag', place:'bottom', ic:'governance', col:'#C084FC',
+  es:{t:'Diagnóstico del diseño',
+      b:'Este botón revisa tu diseño contra las <b>reglas estructurales de unFIX</b>: tamaño de los Crews, Bases sin Governance Crew, proporción de Value Stream Crews, Bases por encima de unas 150 personas y elementos huérfanos o sin misión.',
+      q:'El contador naranja del botón te dice cuántas observaciones hay abiertas en cada momento.'},
+  en:{t:'Design diagnostics',
+      b:'This button checks your design against the <b>unFIX structural rules</b>: Crew sizes, Bases with no Governance Crew, the share of Value Stream Crews, Bases above roughly 150 people, and orphan or mission-less elements.',
+      q:'The orange counter on the button tells you how many findings are open at any moment.'} },
+
+{ id:'scaling', target:()=>q1('.pgroup[data-group="scale"]')||q1('#sidebar'), place:'right', tab:'left', ic:'crowd', col:'#F472B6',
+  before:()=>{ tourPaletteTo('scale', true); },
+  es:{t:'Escalar: League y Crowd',
+      b:'El modelo es <b>fractal</b>. Docenas de Bases colaboran en una <b>League</b>, se agrupan en <b>Clusters</b> y se coordinan en <b>Assemblies</b>. Docenas de Leagues forman un <b>Crowd</b>, con <b>Coalitions</b> y <b>Congresses</b>.',
+      q:'Los mismos patrones se repiten en cada escala: Cluster es el Crew de la League, y Assembly es su Forum.'},
+  en:{t:'Scaling: League and Crowd',
+      b:'The model is <b>fractal</b>. Dozens of Bases collaborate in a <b>League</b>, group into <b>Clusters</b> and coordinate in <b>Assemblies</b>. Dozens of Leagues form a <b>Crowd</b>, with <b>Coalitions</b> and <b>Congresses</b>.',
+      q:'The same patterns repeat at every scale: a Cluster is the League’s Crew, and an Assembly is its Forum.'} },
+
+{ id:'export', target:'#btn-export', place:'bottom', ic:'platform', col:'#2DD4A7',
+  es:{t:'Guardar y compartir',
+      b:'Exporta a <b>JSON</b> (reimportable aquí), a <b>PNG</b> para una presentación o a <b>SVG</b> vectorial para retocarlo en Figma. Tu trabajo se guarda solo en este navegador mientras diseñas.',
+      q:'Ya está. Empieza por una sola Base con tus Crews reales, marca sus estados y deja que el diagnóstico te señale qué mirar primero.'},
+  en:{t:'Save and share',
+      b:'Export to <b>JSON</b> (re-importable here), to <b>PNG</b> for a deck, or to vector <b>SVG</b> to refine in Figma. Your work autosaves in this browser while you design.',
+      q:'That’s it. Start with a single Base and your real Crews, mark their states, and let the diagnostics point at what to look at first.'} }
+];
+
+let tourIx = -1;
+const tourOn = () => q1('#tour').classList.contains('on');
+
+function tourTargetEl(st){
+  if(!st.target) return null;
+  try{ return typeof st.target === 'function' ? st.target() : q1(st.target); }catch(e){ return null; }
+}
+
+function tourPaint(){
+  const st = TOUR[tourIx]; if(!st) return;
+  const L = st[LANG] || st.es;
+  const wrap = q1('#tour'), hole = q1('#tour-hole'), card = q1('#tour-card'), arrow = q1('#tour-arrow');
+  const vw = window.innerWidth, vh = window.innerHeight, mob = vw <= 900;
+
+  let bars = '';
+  for(let i=0;i<TOUR.length;i++) bars += '<i class="'+(i<=tourIx?'on':'')+'"></i>';
+  const last = tourIx === TOUR.length-1;
+  q1('#tour-inner').innerHTML =
+    '<div class="tour-top">'+
+      '<span class="tour-ic" style="color:'+st.col+'">'+ico(st.ic,' style="color:'+st.col+'"')+'</span>'+
+      '<h4>'+L.t+'</h4>'+
+      '<span class="tour-step">'+(tourIx+1)+'/'+TOUR.length+'</span>'+
+    '</div>'+
+    '<p>'+L.b+'</p>'+
+    (L.q ? '<p class="tour-quote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21.5h4"/><path d="M12 2.5a6.5 6.5 0 0 0-3.7 11.8c.5.4.7.9.7 1.4v.3h6v-.3c0-.5.2-1 .7-1.4A6.5 6.5 0 0 0 12 2.5z"/></svg><span>'+L.q+'</span></p>' : '')+
+    '<div class="tour-bar">'+bars+'</div>'+
+    '<div class="tour-foot">'+
+      '<button class="btn skip" data-tour="end">'+esc(t('tour.skip'))+'</button>'+
+      '<button class="btn" data-tour="prev"'+(tourIx===0?' disabled':'')+'>'+esc(t('tour.prev'))+'</button>'+
+      '<button class="btn primary" data-tour="next">'+esc(last?t('tour.done'):t('tour.next'))+'</button>'+
+    '</div>';
+
+  // ── foco ──
+  const el = tourTargetEl(st);
+  let r = null;
+  if(el){
+    const b = el.getBoundingClientRect();
+    if(b.width > 4 && b.height > 4 && b.bottom > 0 && b.top < vh && b.right > 0 && b.left < vw) r = b;
+  }
+  wrap.classList.toggle('no-target', !r);
+  const M = 10;
+  if(r){
+    hole.style.left = Math.max(-4, r.left-M)+'px';
+    hole.style.top = Math.max(-4, r.top-M)+'px';
+    hole.style.width = Math.min(vw+8, r.width+M*2)+'px';
+    hole.style.height = Math.min(vh+8, r.height+M*2)+'px';
+    hole.style.borderRadius = (st.radius||14)+'px';
+  }else{
+    hole.style.left = (vw/2)+'px'; hole.style.top = (vh/2)+'px';
+    hole.style.width = '0px'; hole.style.height = '0px';
+  }
+
+  // ── tarjeta ──
+  if(mob){ arrow.className = 'none'; return; }
+  card.style.left = '-9999px'; card.style.top = '0px';
+  const cw = card.offsetWidth, ch = card.offsetHeight, gap = 18, pad = 14;
+  let place = st.place || 'auto';
+  if(!r) place = 'center';
+  let x, y;
+  if(place === 'center'){
+    x = clamp((vw-cw)/2, pad, Math.max(pad, vw-cw-pad));
+    y = clamp((vh-ch)/2, pad, Math.max(pad, vh-ch-pad));
+  }else{
+    // Evalúa los cuatro lados y se queda con el que menos tapa el foco.
+    const sides = (place === 'auto') ? ['right','left','bottom','top'] : [place];
+    let best = null;
+    sides.forEach(function(pl){
+      let px, py;
+      if(pl === 'right'){ px = r.right+gap; py = r.top + r.height/2 - ch/2; }
+      else if(pl === 'left'){ px = r.left-gap-cw; py = r.top + r.height/2 - ch/2; }
+      else if(pl === 'bottom'){ px = r.left + r.width/2 - cw/2; py = r.bottom+gap; }
+      else { px = r.left + r.width/2 - cw/2; py = r.top-gap-ch; }
+      px = clamp(px, pad, Math.max(pad, vw-cw-pad));
+      py = clamp(py, pad, Math.max(pad, vh-ch-pad));
+      const ox = Math.max(0, Math.min(px+cw, r.right+M) - Math.max(px, r.left-M));
+      const oy = Math.max(0, Math.min(py+ch, r.bottom+M) - Math.max(py, r.top-M));
+      const area = ox*oy;
+      if(!best || area < best.area) best = {pl:pl, x:px, y:py, area:area};
+    });
+    place = best.pl; x = best.x; y = best.y;
+  }
+  card.style.left = Math.round(x)+'px';
+  card.style.top = Math.round(y)+'px';
+
+  if(place === 'center' || !r){ arrow.className = 'none'; return; }
+  const A = 6.5;
+  if(place === 'right' || place === 'left'){
+    arrow.className = place === 'right' ? 'left' : 'right';
+    arrow.style.left = (place === 'right' ? -A : cw-A)+'px';
+    arrow.style.top = clamp(r.top + r.height/2 - y - A, 16, ch-29)+'px';
+  }else{
+    arrow.className = place === 'bottom' ? 'up' : 'down';
+    arrow.style.top = (place === 'bottom' ? -A : ch-A)+'px';
+    arrow.style.left = clamp(r.left + r.width/2 - x - A, 18, cw-31)+'px';
+  }
+}
+
+function tourGo(i){
+  if(i < 0) return;
+  if(i >= TOUR.length){ tourEnd(true); return; }
+  tourIx = i;
+  const st = TOUR[i];
+  if(window.innerWidth <= 900 && st.tab) setTab(st.tab);
+  if(st.before){ try{ st.before(); }catch(e){} }
+  requestAnimationFrame(function(){ requestAnimationFrame(tourPaint); });
+}
+function tourStart(){
+  if(tourOn()) return;
+  setLinkMode(null);
+  closeModal();
+  q1('#tour').classList.add('on');
+  tourGo(0);
+}
+function tourEnd(completed){
+  if(!tourOn()) return;
+  q1('#tour').classList.remove('on');
+  tourIx = -1;
+  try{ localStorage.setItem('unfix-tour-v1','done'); }catch(e){}
+  if(completed) toast(t('tour.finished'),'ok');
+}
+q1('#tour-card').addEventListener('click', function(e){
+  const b = e.target.closest('[data-tour]'); if(!b) return;
+  const a = b.getAttribute('data-tour');
+  if(a === 'end') tourEnd();
+  else if(a === 'prev') tourGo(tourIx-1);
+  else tourGo(tourIx+1);
+});
+q1('#tour-catch').addEventListener('click', function(e){ e.stopPropagation(); });
+q1('#btn-tour').addEventListener('click', function(){ tourStart(); });
+window.addEventListener('resize', function(){ if(tourOn()) tourPaint(); });
+q1('#palette').addEventListener('scroll', function(){ if(tourOn()) tourPaint(); });
+
+/* ══════════════════════════════════════════════════════════════
+   20 · ARRANQUE
+   ══════════════════════════════════════════════════════════════ */
+function boot(){
+  const restored = loadLocal();
+  if(!restored){ const d = exampleData(LANG); S.nodes = d.nodes; S.links = d.links; S.title = d.title; }
+  $('#doc-name').value = S.title;
+  applyI18n();
+  setLinkMode(null);
+  refreshUndo();
+  if(!restored) setTimeout(()=>fitView(), 60);
+  else applyView();
+  runDiagnostics();
+
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(function(){ render(); });
+  }
+
+  let firstVisit = true;
+  try{ firstVisit = localStorage.getItem('unfix-tour-v1') !== 'done'; }catch(e){}
+  if(firstVisit) setTimeout(function(){ if(!$('#modal-bg').classList.contains('open')) tourStart(); }, 850);
+}
+boot();
+
+})();
+</script>
+</body>
+</html>

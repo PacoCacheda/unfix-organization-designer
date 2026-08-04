@@ -5,7 +5,7 @@
 
 **▶️ [Abrir la herramienta](https://pacocacheda.github.io/unfix-organization-designer/)**
 
-*[English version below](#english)*
+*[English version](README-EN.md)*
 
 ---
 
@@ -68,47 +68,3 @@ HTML, CSS y JavaScript en un único archivo de ~2.700 líneas. Renderizado en SV
 ## Licencia
 
 [MIT](LICENSE) — el código de la herramienta. El modelo unFIX y su terminología pertenecen a sus respectivos autores.
-
----
-
-<a name="english"></a>
-
-# English
-
-> Visual organization designer based on Jurgen Appelo's **unFIX** model.
-> A single HTML file. No build, no server, no dependencies.
-
-**▶️ [Open the tool](https://pacocacheda.github.io/unfix-organization-designer/)**
-
-## What it is
-
-A canvas tool for mapping how an organization is — or could be — structured, using the [unFIX](https://unfix.com) pattern library: Bases, Crews, Forums, Turfs, Leagues, Crowds and everything in between.
-
-Drag patterns from the side library, nest them inside containers, connect them, and annotate each element with its mission, people and maturity state. The tool checks the result against the model's structural rules and flags what looks off.
-
-## Features
-
-- **Full unFIX pattern library** — 10 families and 38 subtypes, each with a description and a link to the official docs (7 Crew Types, 4 Base Types, 10 Forum Types, 4 Turf Types, plus League- and Crowd-level scaling patterns).
-- **Real containment** — drop a Crew inside a Base or Turf and it belongs to it; moving the container moves its contents.
-- **Three connection types** — Value flow (solid), Dependency (dashed) and Alignment (dotted, double arrow).
-- **Maturity states** — Turmoil, Forming, Performing and Reforming, visually encoded.
-- **Design diagnostics** — checks the canvas against unFIX structural rules and summarizes element and headcount totals.
-- **Per-element inspector** — name, type, mission, lead, people, notes and connections.
-- **Export** — re-importable JSON, 2× PNG and vector SVG (editable in Figma, Illustrator or Inkscape).
-- **Bilingual** — full UI in Spanish and English.
-- **Auto-save** to `localStorage`; nothing leaves your machine.
-- **Interactive guided tour** on first run.
-
-## Usage
-
-Nothing to install. Either open it [online](https://pacocacheda.github.io/unfix-organization-designer/), or download `index.html` and double-click it in any modern browser. Works offline (only web fonts are remote; without them it falls back to system fonts).
-
-## About the unFIX model
-
-unFIX is **not a framework** — it's a pattern library. Nothing is mandatory, the approach is bottom-up, and the model is fractal: the same patterns repeat at Base, League and Crowd level.
-
-The model is the work of **Jurgen Appelo** and is documented at **[unfix.com](https://unfix.com)**. This project is an independent, unofficial tool with no affiliation to unFIX or its author.
-
-## License
-
-[MIT](LICENSE) for the tool's code. The unFIX model and its terminology belong to their respective authors.

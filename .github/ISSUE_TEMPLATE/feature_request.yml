@@ -1,0 +1,106 @@
+name: 💡 Proponer una mejora · Feature request
+description: Sugiere una funcionalidad, un patrón del catálogo o una regla de diagnóstico
+title: "[feat]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por proponerlo. Antes de escribir código, **espera confirmación en este issue** — así nadie tira trabajo a la basura.
+
+        *You can write in English or Spanish, whichever you prefer.*
+
+  - type: checkboxes
+    id: previos
+    attributes:
+      label: Comprobaciones previas
+      options:
+        - label: He buscado en los [issues existentes](https://github.com/PacoCacheda/unfix-organization-designer/issues) y no está propuesto
+          required: true
+        - label: He revisado el [Roadmap 2026](https://github.com/PacoCacheda/unfix-organization-designer#roadmap-2026) y no está ya planificado
+          required: true
+        - label: He leído [Qué no se aceptará](https://github.com/PacoCacheda/unfix-organization-designer/blob/main/CONTRIBUTING.md#qué-no-se-aceptará) y mi propuesta no entra ahí
+          required: true
+
+  - type: dropdown
+    id: tipo
+    attributes:
+      label: Tipo de propuesta
+      options:
+        - Patrón o subtipo nuevo en el catálogo unFIX
+        - Regla de diagnóstico nueva
+        - Funcionalidad del lienzo o de la edición
+        - Formato de exportación o importación
+        - Mejora de interfaz o de usabilidad
+        - Accesibilidad
+        - Traducción o idioma nuevo
+        - Rendimiento
+        - Otro
+    validations:
+      required: true
+
+  - type: textarea
+    id: problema
+    attributes:
+      label: Qué problema resuelve
+      description: |
+        Describe la situación real, no la solución. Las mejores propuestas empiezan por una frustración concreta.
+      placeholder: |
+        Cuando facilito un taller de rediseño con 40 personas necesito comparar el "antes" y el "después",
+        pero solo puedo tener un diseño guardado a la vez y acabo perdiendo el original.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solucion
+    attributes:
+      label: Solución que propones
+      description: Cómo debería comportarse la herramienta. Si tienes un boceto, arrástralo aquí.
+    validations:
+      required: true
+
+  - type: textarea
+    id: unfix
+    attributes:
+      label: Respaldo en el modelo unFIX
+      description: |
+        **Obligatorio** si propones un patrón del catálogo o una regla de diagnóstico.
+        Enlaza y cita la página de [unfix.com](https://unfix.com) que lo respalda — el proyecto no inventa terminología ni reglas.
+      placeholder: |
+        https://unfix.com/crew-types — "A Crew is a small team on a mission with a defined goal.
+        Three to seven people, with no manager on the Crew."
+
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: Alternativas consideradas
+      description: Otras formas de resolverlo, incluida la de no hacer nada. Qué las descarta.
+
+  - type: dropdown
+    id: encaje
+    attributes:
+      label: ¿Encaja en las restricciones del proyecto?
+      description: Un archivo, cero dependencias, cero build, cero backend, cero telemetría.
+      options:
+        - "Sí — se puede implementar sin romper ninguna"
+        - "No estoy seguro/a"
+        - "No — requiere relajar alguna restricción (explícalo abajo)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: contribuir
+    attributes:
+      label: ¿Querrías implementarlo?
+      options:
+        - "Sí, si se aprueba abro el PR"
+        - "Sí, pero necesitaría orientación sobre por dónde empezar"
+        - "No, solo lo propongo"
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Contexto adicional
+      description: Referencias, herramientas que lo hacen bien, capturas, cualquier cosa que ayude.

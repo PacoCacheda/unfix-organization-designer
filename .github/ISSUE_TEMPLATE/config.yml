@@ -1,0 +1,17 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Preguntas y conversación
+    url: https://github.com/PacoCacheda/unfix-organization-designer/discussions
+    about: Dudas de uso, ideas a medio cocer o conversación sobre diseño organizativo. No abras un issue para preguntar.
+
+  - name: 🔐 Reportar una vulnerabilidad
+    url: https://github.com/PacoCacheda/unfix-organization-designer/security/advisories/new
+    about: Los fallos de seguridad se reportan en privado, nunca como issue público.
+
+  - name: 📖 Documentación del modelo unFIX
+    url: https://unfix.com
+    about: Preguntas sobre el modelo en sí (qué es un Turf, cuándo usar un Forum) van a la fuente oficial de Jurgen Appelo, no aquí.
+
+  - name: 🤝 Cómo contribuir
+    url: https://github.com/PacoCacheda/unfix-organization-designer/blob/main/CONTRIBUTING.md
+    about: Flujo de trabajo, estándares de código y qué se acepta antes de abrir un PR.

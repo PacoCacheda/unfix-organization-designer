@@ -1,0 +1,142 @@
+name: 🐛 Reportar un fallo · Bug report
+description: Algo no funciona como debería en el diseñador
+title: "[bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por tomarte el tiempo de reportarlo.
+
+        > ⚠️ **¿Es un fallo de seguridad?** No lo publiques aquí. Sigue la [política de seguridad](https://github.com/PacoCacheda/unfix-organization-designer/blob/main/SECURITY.md).
+
+        *You can write in English or Spanish, whichever you prefer.*
+
+  - type: checkboxes
+    id: previos
+    attributes:
+      label: Comprobaciones previas
+      options:
+        - label: He buscado en los [issues existentes](https://github.com/PacoCacheda/unfix-organization-designer/issues) y no está reportado
+          required: true
+        - label: Estoy usando la versión actual (la [web viva](https://pacocacheda.github.io/unfix-organization-designer/) o un `index.html` descargado hoy)
+          required: true
+        - label: He probado a recargar con la caché limpia (`Ctrl/Cmd + Shift + R`)
+          required: true
+
+  - type: textarea
+    id: descripcion
+    attributes:
+      label: Qué ocurre
+      description: Descripción clara del comportamiento incorrecto.
+      placeholder: Al arrastrar un Crew fuera de una Base, el Crew conserva el parent anterior y se dibuja detrás del contenedor.
+    validations:
+      required: true
+
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Qué esperabas que ocurriera
+      placeholder: El Crew debería quedar suelto en el lienzo, con parent a null.
+    validations:
+      required: true
+
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Pasos para reproducirlo
+      description: Numerados y lo más concretos posible. Si no es reproducible de forma fiable, dilo.
+      value: |
+        1. Abrir la herramienta con el lienzo vacío
+        2. Arrastrar una Base al lienzo
+        3. …
+        4. Se observa que …
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área afectada
+      description: Si lo sabes, ayuda mucho a localizar la sección del código.
+      multiple: true
+      options:
+        - Paleta de patrones
+        - Lienzo — arrastre, contención o reparenting
+        - Lienzo — zoom, pan o encuadre
+        - Conexiones (flujo / dependencia / alineación)
+        - Inspector (panel de datos)
+        - Diagnóstico de reglas unFIX
+        - Exportación JSON
+        - Exportación SVG
+        - Exportación PNG
+        - Importación de JSON
+        - Deshacer / Rehacer
+        - Guardado automático (localStorage)
+        - Idioma / traducciones
+        - Tour de ayuda guiada
+        - Layout móvil o responsive
+        - Atajos de teclado
+        - Otro / no lo sé
+    validations:
+      required: true
+
+  - type: textarea
+    id: consola
+    attributes:
+      label: Errores de consola
+      description: Abre DevTools (`F12`) → pestaña Console y pega lo que aparezca en rojo. Se formatea solo.
+      render: text
+
+  - type: textarea
+    id: fichero
+    attributes:
+      label: Diseño de ejemplo
+      description: |
+        Si el fallo depende de un diseño concreto, expórtalo a JSON y **arrástralo aquí**
+        (renombra a `.txt` si GitHub rechaza el `.json`). Es la forma más rápida de reproducirlo.
+
+  - type: input
+    id: navegador
+    attributes:
+      label: Navegador y versión
+      placeholder: Chrome 141.0.7390.55
+    validations:
+      required: true
+
+  - type: dropdown
+    id: so
+    attributes:
+      label: Sistema operativo
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - iOS / iPadOS
+        - Android
+        - Otro
+    validations:
+      required: true
+
+  - type: dropdown
+    id: origen
+    attributes:
+      label: Cómo lo estás abriendo
+      options:
+        - Web viva (GitHub Pages)
+        - Archivo local por doble clic (file://)
+        - Servidor local (http://localhost)
+    validations:
+      required: true
+
+  - type: textarea
+    id: capturas
+    attributes:
+      label: Capturas o vídeo
+      description: Arrastra aquí imágenes o un GIF corto. Para un editor visual, vale más que mil palabras.
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Contexto adicional
+      description: Cualquier otra cosa relevante — extensiones del navegador, modo incógnito, tamaño del diseño…
